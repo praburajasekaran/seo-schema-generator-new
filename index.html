@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SEO Schema Generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Murecho:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Murecho', 'sans-serif'],
+            },
+            colors: {
+              // Heuristic #5: One Accent → Many Variations - Ocean Blue Spectrum
+              'brand': {
+                50: '#eff6ff',
+                100: '#dbeafe', 
+                200: '#bfdbfe',
+                300: '#93c5fd',
+                400: '#60a5fa',
+                500: '#3b82f6',
+                600: '#2563eb',
+                700: '#1d4ed8',
+                800: '#1e40af',  // Primary brand color
+                900: '#1e3a8a',
+                950: '#172554',
+              },
+              // Legacy aliases for backward compatibility
+              'brand-primary': '#1e40af',
+              'brand-secondary': '#1d4ed8', 
+              'brand-accent': '#3b82f6',
+              // Heuristic #2: Black & White First - Enhanced grays
+              'base': {
+                50: '#f9fafb',
+                100: '#f3f4f6',
+                200: '#e5e7eb',
+                300: '#d1d5db',
+                400: '#9ca3af',
+                500: '#6b7280',
+                600: '#4b5563',
+                700: '#374151',
+                800: '#1f2937',
+                900: '#111827',
+                950: '#030712',
+              },
+              // Legacy aliases
+              'base-100': '#111827',
+              'base-200': '#1f2937', 
+              'base-300': '#374151',
+              'text-primary': '#f9fafb',
+              'text-secondary': '#9ca3af',
+              // Semantic colors derived from brand
+              'success': {
+                50: '#ecfdf5',
+                100: '#d1fae5',
+                500: '#10b981',
+                600: '#059669',
+                700: '#047857',
+              },
+              'warning': {
+                50: '#fffbeb',
+                100: '#fef3c7',
+                500: '#f59e0b',
+                600: '#d97706',
+                700: '#b45309',
+              },
+              'error': {
+                50: '#fef2f2',
+                100: '#fee2e2',
+                500: '#ef4444',
+                600: '#dc2626',
+                700: '#b91c1c',
+              },
+              // Enhanced syntax highlighting
+              'syntax': {
+                'key': '#7c3aed',      // violet-600
+                'string': '#059669',   // emerald-600  
+                'number': '#ea580c',   // orange-600
+                'boolean': '#2563eb',  // blue-600
+                'null': '#6b7280',     // gray-500
+                'dark-key': '#a78bfa', // violet-400
+                'dark-string': '#34d399', // emerald-400
+                'dark-number': '#fb923c', // orange-400
+                'dark-boolean': '#60a5fa', // blue-400
+                'dark-null': '#9ca3af', // gray-400
+              },
+            },
+            spacing: {
+              // Heuristic #4: 8-pt Grid All the Way
+              '1': '0.25rem',  // 4px
+              '2': '0.5rem',   // 8px
+              '3': '0.75rem',  // 12px
+              '4': '1rem',     // 16px
+              '6': '1.5rem',   // 24px
+              '8': '2rem',     // 32px
+              '12': '3rem',    // 48px
+              '16': '4rem',    // 64px
+            },
+            boxShadow: {
+              // Premium Shadow System - Dan Mall's 80/20 Craft Investment
+              'premium': '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              'premium-lg': '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              'premium-xl': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+              'premium-glow': '0 4px 14px 0 rgba(30, 64, 175, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+              'premium-glow-lg': '0 8px 25px 0 rgba(30, 64, 175, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15)',
+              // Legacy shadows for backward compatibility
+              'elevated': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+              'elevated-lg': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            },
+            backdropBlur: {
+              'premium': '20px',
+              'glass': '10px',
+            },
+            animation: {
+              'shimmer': 'shimmer 2s ease-in-out infinite',
+              'pulse-premium': 'pulse-premium 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'fade-in-premium': 'fade-in-premium 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+              'slide-in-premium': 'slide-in-premium 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards',
+              'bounce-premium': 'bounce-premium 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.22.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-50 dark:bg-base-100">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,5 @@
+{
+  "name": "SEO Schema Generator",
+  "description": "Analyzes a blog post from a given URL and recommends and generates appropriate SEO schemas (like Article, FAQPage, etc.) using AI.",
+  "requestFramePermissions": []
+}
