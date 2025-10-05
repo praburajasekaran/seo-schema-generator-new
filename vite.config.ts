@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => {
         host: '0.0.0.0',
       },
       plugins: [react()],
+      publicDir: 'public',
       define: {
         'process.env.OPENROUTER_API_KEY': JSON.stringify(env.OPENROUTER_API_KEY),
         'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY || env.API_KEY),
