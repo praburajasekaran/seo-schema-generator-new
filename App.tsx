@@ -91,13 +91,16 @@ const App: React.FC = () => {
   }, [selectedProfileId]);
 
   const handleProfileSave = (profileData: Omit<WebsiteProfile, 'id'> & { id?: string }) => {
+    console.log('handleProfileSave called with:', profileData);
     if (profileData.id) {
       // Update existing profile
+      console.log('Updating existing profile:', profileData.id);
       setProfiles(currentProfiles =>
         currentProfiles.map(p => (p.id === profileData.id ? { ...p, ...profileData, id: p.id } : p))
       );
     } else {
       // Add new profile
+      console.log('Creating new profile');
       const newProfile: WebsiteProfile = {
         profileName: profileData.profileName,
         companyName: profileData.companyName || '',
@@ -105,6 +108,7 @@ const App: React.FC = () => {
         companyLogoUrl: profileData.companyLogoUrl || '',
         id: crypto.randomUUID(),
       };
+      console.log('New profile created:', newProfile);
       setProfiles(currentProfiles => [...currentProfiles, newProfile]);
       setSelectedProfileId(newProfile.id);
     }

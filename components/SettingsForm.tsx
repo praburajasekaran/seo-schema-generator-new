@@ -46,11 +46,13 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData);
     if (!formData.profileName) {
       // Basic validation
       alert('Profile Name is required.');
       return;
     }
+    console.log('Calling onProfileSave with:', formData);
     onProfileSave(formData);
     setIsSaved(true);
     setTimeout(() => setIsSaved(false), 2000);
