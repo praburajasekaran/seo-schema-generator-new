@@ -105,3 +105,12 @@ $RECYCLE.BIN/
 
 # Local development
 *.local
+
+# Large image files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+*.webp
