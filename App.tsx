@@ -11,8 +11,7 @@ import { ErrorIcon } from './components/icons/ErrorIcon';
 import { ClipboardIcon } from './components/icons/ClipboardIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
 import { Info, Database, CheckCircle, Zap, Search, FileText } from 'lucide-react';
-// Import the image as a static asset
-const pallavaImage = '/pallava-1.png';
+import pallavaImage from './pallava-1.png';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState<string>('');
