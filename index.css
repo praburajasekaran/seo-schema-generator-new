@@ -388,6 +388,36 @@
     0 0 0 0 rgba(59, 130, 246, 0);
 }
 
+/* Floating Label Support */
+.input-field.pt-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 0.5rem;
+}
+
+/* Ensure floating labels work properly */
+.peer:focus ~ label,
+.peer:not(:placeholder-shown) ~ label {
+  top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--brand-600);
+}
+
+.dark .peer:focus ~ label,
+.dark .peer:not(:placeholder-shown) ~ label {
+  color: var(--brand-400);
+}
+
+/* Fix form alignment issues */
+.flex.items-end {
+  align-items: flex-end;
+}
+
+@media (max-width: 640px) {
+  .flex.items-end {
+    align-items: stretch;
+  }
+}
+
 /* Radio Button Styling - Heuristic #19 */
 input[type="radio"] {
   appearance: none;
@@ -701,6 +731,11 @@ input[type="checkbox"]:focus {
   
   .flex-col.sm\\:flex-row > * {
     width: 100%;
+  }
+  
+  /* Ensure proper alignment on mobile */
+  .items-end {
+    align-items: stretch;
   }
   
   /* Mobile spacing adjustments */

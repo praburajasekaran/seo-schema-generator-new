@@ -44,80 +44,139 @@ const schema = {
  * @returns An object containing the cleaned page text, any existing schema text, and an array of breadcrumb items.
  */
 export const scrapePageContent = async (url: string): Promise<{ pageText: string; existingSchemaText: string; breadcrumbs: BreadcrumbItem[]; pageTitle: string; }> => {
-  // Using a CORS proxy to fetch the content from the client-side.
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+  // Multiple CORS proxy services as fallbacks
+  const proxyServices = [
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    `https://cors-anywhere.herokuapp.com/${url}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    `https://thingproxy.freeboard.io/fetch/${url}`
+  ];
 
-  try {
-    const response = await fetch(proxyUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch page content via proxy. The target site returned status: ${response.status}`);
-    }
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
-
-    // 0. Extract Page Title for display
-    const pageTitle = doc.querySelector('title')?.textContent?.trim() || url;
-
-    // 1. Extract existing JSON-LD schemas to use as context
-    const existingSchemaScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
-    const existingSchemaText = existingSchemaScripts
-      .map(script => {
-        try {
-          // Prettify the JSON to make it more readable for the AI
-          const parsed = JSON.parse(script.textContent || '{}');
-          return JSON.stringify(parsed, null, 2);
-        } catch {
-          return script.textContent || ''; // Fallback to raw text if not valid JSON
-        }
-      })
-      .join('\n---\n');
+  let lastError: Error | null = null;
+  
+  for (let i = 0; i < proxyServices.length; i++) {
+    const proxyUrl = proxyServices[i];
+    
+    try {
+      console.log(`Attempting to fetch via proxy ${i + 1}/${proxyServices.length}: ${proxyUrl.split('?')[0]}`);
       
-    // 2. Extract breadcrumbs
-    const breadcrumbs: BreadcrumbItem[] = [];
-    const breadcrumbSelectors = [
-        'nav[aria-label="breadcrumb"] ol li a',
-        '.breadcrumb a',
-        '.breadcrumbs a',
-        '.crumbs a'
-    ];
-    let breadcrumbElements: Element[] = [];
-    for(const selector of breadcrumbSelectors) {
-        const elements = Array.from(doc.querySelectorAll(selector));
-        if (elements.length > 0) {
-            breadcrumbElements = elements;
-            break;
-        }
+      const response = await fetch(proxyUrl, {
+        method: 'GET',
+        headers: {
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Schema-Generator/1.0)',
+        },
+        // Add timeout
+        signal: AbortSignal.timeout(15000) // 15 second timeout
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Proxy service returned status: ${response.status} ${response.statusText}`);
+      }
+      
+      const html = await response.text();
+      
+      if (!html || html.trim().length === 0) {
+        throw new Error('Proxy service returned empty content');
+      }
+      
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+
+      // 0. Extract Page Title for display
+      const pageTitle = doc.querySelector('title')?.textContent?.trim() || url;
+
+      // 1. Extract existing JSON-LD schemas to use as context
+      const existingSchemaScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
+      const existingSchemaText = existingSchemaScripts
+        .map(script => {
+          try {
+            // Prettify the JSON to make it more readable for the AI
+            const parsed = JSON.parse(script.textContent || '{}');
+            return JSON.stringify(parsed, null, 2);
+          } catch {
+            return script.textContent || ''; // Fallback to raw text if not valid JSON
+          }
+        })
+        .join('\n---\n');
+        
+      // 2. Extract breadcrumbs
+      const breadcrumbs: BreadcrumbItem[] = [];
+      const breadcrumbSelectors = [
+          'nav[aria-label="breadcrumb"] ol li a',
+          '.breadcrumb a',
+          '.breadcrumbs a',
+          '.crumbs a'
+      ];
+      let breadcrumbElements: Element[] = [];
+      for(const selector of breadcrumbSelectors) {
+          const elements = Array.from(doc.querySelectorAll(selector));
+          if (elements.length > 0) {
+              breadcrumbElements = elements;
+              break;
+          }
+      }
+      
+      breadcrumbElements.forEach(el => {
+          const anchor = el as HTMLAnchorElement;
+          const name = anchor.textContent?.trim();
+          const url = anchor.href;
+          if (name && url) {
+              breadcrumbs.push({ name, url });
+          }
+      });
+
+      // 3. Intelligently clean the document for main content extraction (like a "Reader Mode")
+      const selectorsToRemove = ['header', 'footer', 'nav', 'aside', 'form', 'script', 'style', '[role="navigation"]', '[role="search"]', '[role="banner"]', '[role="contentinfo"]'];
+      selectorsToRemove.forEach(selector => {
+        doc.querySelectorAll(selector).forEach(el => el.remove());
+      });
+      
+      // 4. Extract the main text content
+      const mainContentElement = doc.querySelector('main') || doc.querySelector('article') || doc.body;
+      let pageText = mainContentElement.textContent || "";
+      
+      // Clean up excessive whitespace and newlines
+      pageText = pageText.replace(/\s\s+/g, ' ').trim();
+      
+      console.log(`Successfully fetched content via proxy ${i + 1}`);
+      return { pageText, existingSchemaText, breadcrumbs, pageTitle };
+      
+    } catch (error) {
+      console.warn(`Proxy ${i + 1} failed:`, error);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      
+      // If this is the last proxy, we'll throw the error
+      if (i === proxyServices.length - 1) {
+        break;
+      }
+      
+      // Wait a bit before trying the next proxy
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    
-    breadcrumbElements.forEach(el => {
-        const anchor = el as HTMLAnchorElement;
-        const name = anchor.textContent?.trim();
-        const url = anchor.href;
-        if (name && url) {
-            breadcrumbs.push({ name, url });
-        }
-    });
-
-
-    // 3. Intelligently clean the document for main content extraction (like a "Reader Mode")
-    const selectorsToRemove = ['header', 'footer', 'nav', 'aside', 'form', 'script', 'style', '[role="navigation"]', '[role="search"]', '[role="banner"]', '[role="contentinfo"]'];
-    selectorsToRemove.forEach(selector => {
-      doc.querySelectorAll(selector).forEach(el => el.remove());
-    });
-    
-    // 4. Extract the main text content
-    const mainContentElement = doc.querySelector('main') || doc.querySelector('article') || doc.body;
-    let pageText = mainContentElement.textContent || "";
-    
-    // Clean up excessive whitespace and newlines
-    pageText = pageText.replace(/\s\s+/g, ' ').trim();
-    
-    return { pageText, existingSchemaText, breadcrumbs, pageTitle };
-  } catch (error) {
-    console.error("Scraping failed:", error);
-    throw new Error("Failed to fetch content from the URL. The page might be down, blocking requests, or the CORS proxy service could be unavailable.");
   }
+  
+  // If we get here, all proxies failed
+  console.error("All CORS proxy services failed:", lastError);
+  
+  // Provide more specific error messages based on the type of failure
+  if (lastError?.message.includes('timeout') || lastError?.message.includes('AbortError')) {
+    throw new Error("Request timed out. The website might be slow to respond or blocking automated requests. Please try again or with a different URL.");
+  }
+  
+  if (lastError?.message.includes('404') || lastError?.message.includes('Not Found')) {
+    throw new Error("The URL could not be found. Please check that the URL is correct and the page exists.");
+  }
+  
+  if (lastError?.message.includes('403') || lastError?.message.includes('Forbidden')) {
+    throw new Error("Access to this URL is forbidden. The website might be blocking automated requests or require authentication.");
+  }
+  
+  if (lastError?.message.includes('CORS') || lastError?.message.includes('cross-origin')) {
+    throw new Error("CORS policy prevents access to this URL. All proxy services are currently unavailable. Please try again later or contact support if the issue persists.");
+  }
+  
+  throw new Error("Failed to fetch content from the URL. The page might be down, blocking requests, or all CORS proxy services could be temporarily unavailable. Please try again later.");
 };
 
 

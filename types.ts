@@ -23,6 +23,7 @@ export interface WebsiteInfo {
 export interface WebsiteProfile extends WebsiteInfo {
   id: string;
   profileName: string;
+  isLightLogo?: boolean;
 }
 
 export interface BreadcrumbItem {

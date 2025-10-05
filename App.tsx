@@ -8,10 +8,6 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorIcon } from './components/icons/ErrorIcon';
 import { ClipboardIcon } from './components/icons/ClipboardIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
-import { SunIcon } from './components/icons/SunIcon';
-import { MoonIcon } from './components/icons/MoonIcon';
-
-type Theme = 'light' | 'dark' | 'grayscale';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -41,6 +37,7 @@ const App: React.FC = () => {
             companyName: parsedOldInfo.companyName,
             founderName: parsedOldInfo.founderName,
             companyLogoUrl: parsedOldInfo.companyLogoUrl,
+            isLightLogo: false,
           };
           // Set new storage items
           localStorage.setItem('websiteProfiles', JSON.stringify([newProfile]));
@@ -71,10 +68,9 @@ const App: React.FC = () => {
       // If the selected profile was deleted, select the first one or null
       const firstProfileId = profiles.length > 0 ? profiles[0].id : null;
       setSelectedProfileId(firstProfileId);
-    } else if (!selectedProfileId && profiles.length > 0) {
-      // If nothing is selected but profiles exist, select the first one.
-      setSelectedProfileId(profiles[0].id);
     }
+    // Removed the auto-selection of first profile when selectedProfileId is null
+    // This allows users to explicitly choose "Create New Profile"
   }, [profiles, selectedProfileId]);
   
   // Effect to persist profiles and selected ID to localStorage
@@ -103,6 +99,7 @@ const App: React.FC = () => {
         companyName: profileData.companyName || '',
         founderName: profileData.founderName || '',
         companyLogoUrl: profileData.companyLogoUrl || '',
+        isLightLogo: profileData.isLightLogo || false,
         id: crypto.randomUUID(),
       };
       setProfiles(currentProfiles => [...currentProfiles, newProfile]);
@@ -118,38 +115,10 @@ const App: React.FC = () => {
     }
   };
 
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== 'undefined' && localStorage.theme) {
-      return localStorage.theme as Theme;
-    }
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      return 'dark';
-    }
-    return 'light';
-  });
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.documentElement.classList.remove('grayscale');
-      localStorage.setItem('theme', 'dark');
-    } else if (theme === 'grayscale') {
-      document.documentElement.classList.remove('dark');
-      document.documentElement.classList.add('grayscale');
-      localStorage.setItem('theme', 'grayscale');
-    } else {
-      document.documentElement.classList.remove('dark', 'grayscale');
-      localStorage.setItem('theme', 'light');
-    }
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => {
-      if (prevTheme === 'light') return 'dark';
-      if (prevTheme === 'dark') return 'grayscale';
-      return 'light';
-    });
+  const handleProfileSelect = (id: string | null) => {
+    setSelectedProfileId(id);
   };
+
 
   const generateEssentialSchemas = (profile: WebsiteProfile, url: string): RecommendedSchema[] => {
     try {
@@ -306,38 +275,41 @@ const App: React.FC = () => {
   const hasResults = (schemas && schemas.length > 0) || (essentialSchemas && essentialSchemas.length > 0) || !!breadcrumbSchema;
 
   return (
-    <div className="min-h-screen text-slate-800 dark:text-text-primary font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50 dark:from-slate-900 dark:via-slate-800 dark:to-blue-900">
-      <header className="container mx-auto px-4 pt-6 flex justify-end">
-        <button
-          onClick={toggleTheme}
-          className="p-3 rounded-full text-slate-500 dark:text-text-secondary hover:bg-white/80 dark:hover:bg-slate-700/80 backdrop-blur-sm transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brand-accent shadow-premium"
-          aria-label="Toggle theme"
-        >
-          {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : theme === 'dark' ? <SunIcon className="w-6 h-6" /> : <span className="w-6 h-6 text-xs font-bold">B&W</span>}
-        </button>
-      </header>
-      <main className="container mx-auto px-4 py-8 md:py-16">
-        <div className="text-center mb-20 fade-in-premium">
-            <h1 className="text-hero mb-8">
+    <div className="min-h-screen text-slate-800 font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      <main className="container mx-auto px-6 pt-8 pb-16 md:pt-16 md:pb-24">
+        {/* Hero Banner */}
+        <div className="relative mb-24 rounded-2xl overflow-hidden shadow-2xl">
+          <img 
+            src="/pallava.png" 
+            alt="Ancient temples and monuments in golden light" 
+            className="w-full h-72 md:h-96 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+          <div className="absolute bottom-8 left-8 right-8 text-center">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
               SEO Schema Generator
             </h1>
-          <p className="text-body text-slate-600 dark:text-text-secondary max-w-2xl mx-auto mb-8">
-            Paste a URL. We'll analyze the page and generate relevant JSON-LD schemas for you.
-          </p>
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 dark:bg-brand-900/30 rounded-full text-sm font-medium text-brand-700 dark:text-brand-300">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <p className="text-xl md:text-2xl text-white/95 drop-shadow-md max-w-3xl mx-auto leading-relaxed">
+              Paste a URL. We'll analyze the page and generate relevant JSON-LD schemas for you.
+            </p>
+          </div>
+        </div>
+
+        <div className="text-center mb-24 fade-in-premium">
+          <div className="inline-flex items-center gap-3 px-6 py-3 bg-brand-50 rounded-full text-base font-medium text-brand-700 shadow-sm">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             <span>Free • No signup required</span>
           </div>
         </div>
         
-        <div className="max-w-3xl mx-auto space-y-12">
-          <div className="space-y-8">
+        <div className="max-w-4xl mx-auto space-y-16">
+          <div className="space-y-12">
             <SettingsForm
               profiles={profiles}
               selectedProfile={selectedProfile}
-              onProfileSelect={setSelectedProfileId}
+              onProfileSelect={handleProfileSelect}
               onProfileSave={handleProfileSave}
               onProfileDelete={handleProfileDelete}
             />
@@ -359,15 +331,15 @@ const App: React.FC = () => {
           {isLoading && <LoadingSpinner />}
 
           {!isLoading && analyzedUrl && (
-            <div className="mt-16 border-t border-slate-200/50 dark:border-base-300/50 pt-12">
+            <div className="mt-24 border-t border-slate-200/50 pt-16">
               {hasResults ? (
-                 <div className="space-y-16">
+                 <div className="space-y-24">
                     {essentialSchemas && essentialSchemas.length > 0 && (
                       <div className="fade-in-premium">
-                        <h2 className="text-heading text-center sm:text-left text-slate-900 dark:text-text-primary mb-8">
+                        <h2 className="text-heading text-center sm:text-left text-slate-900 mb-12">
                           Essential Site-Wide Schemas
                         </h2>
-                        <div className="space-y-8">
+                        <div className="space-y-12">
                           {essentialSchemas.map((schema, index) => (
                             <SchemaCard key={`essential-${index}`} schema={schema} />
                           ))}
@@ -377,10 +349,10 @@ const App: React.FC = () => {
                     
                     {breadcrumbSchema && (
                        <div className="fade-in-premium">
-                        <h2 className="text-heading text-center sm:text-left text-slate-900 dark:text-text-primary mb-8">
+                        <h2 className="text-heading text-center sm:text-left text-slate-900 mb-12">
                           Structural Schemas
                         </h2>
-                        <div className="space-y-8">
+                        <div className="space-y-12">
                            <SchemaCard schema={breadcrumbSchema} />
                         </div>
                       </div>
@@ -388,13 +360,13 @@ const App: React.FC = () => {
 
                     {schemas && schemas.length > 0 && (
                       <div>
-                        <div className="mb-8">
+                        <div className="mb-12">
                           <div className="text-center sm:text-left">
-                             <h2 className="text-3xl font-bold font-sans text-slate-900 dark:text-text-primary mb-2">
+                             <h2 className="text-4xl font-bold font-sans text-slate-900 mb-4">
                               Content-Based Schemas
                             </h2>
                             <p 
-                              className="text-brand-primary dark:text-brand-accent font-medium text-lg"
+                              className="text-brand-primary font-medium text-xl"
                               title={analyzedUrl}
                             >
                               {analyzedPageTitle || analyzedUrl}
@@ -402,7 +374,7 @@ const App: React.FC = () => {
                           </div>
                         </div>
                         {validSchemas.length > 1 && (
-                          <div className="mb-10 flex justify-center sm:justify-start">
+                          <div className="mb-12 flex justify-center sm:justify-start">
                             <button
                               onClick={handleCopyAll}
                               className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-brand-primary hover:bg-brand-secondary text-white rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-accent"
@@ -431,14 +403,14 @@ const App: React.FC = () => {
                     )}
                  </div>
               ) : (
-                <div className="text-center text-slate-500 dark:text-text-secondary py-12 fade-in-premium">
+                <div className="text-center text-slate-500 py-12 fade-in-premium">
                   <div className="max-w-md mx-auto">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
                       <svg className="w-8 h-8 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.29-1.009-5.824-2.709M15 6.291A7.962 7.962 0 0012 5c-2.34 0-4.29 1.009-5.824 2.709" />
                       </svg>
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300 mb-2">No Schemas Found</h3>
+                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No Schemas Found</h3>
                     <p className="text-body">We couldn't find any schemas to recommend for that URL.</p>
                     <p className="text-caption mt-2">This can happen if the page content was inaccessible or did not match any common schema types.</p>
                   </div>
@@ -448,7 +420,7 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-      <footer className="text-center py-8 text-caption border-t border-slate-200/50 dark:border-slate-700/50">
+      <footer className="text-center py-8 text-caption border-t border-slate-200/50">
         <p>A simple tool by <a href="https://paretoid.com/" target="_blank" rel="noopener noreferrer" className="text-gradient hover:underline transition-all duration-300">Paretoid Marketing LLP</a>. We prefer less software.</p>
       </footer>
     </div>
