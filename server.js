@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 
 const app = express();
 const PORT = process.env.PORT || 3001;

@@ -276,7 +276,18 @@ Based on content analysis, the following schema types are likely relevant: ${det
 
 Page Content (optimized for speed):
 ---
-${pageText.substring(0, 4000)}
+${pageText.substring(0, 2000)
+  .replace(/"Image"\s+/g, '')
+  .replace(/"Annapoorna"\s+/g, '')
+  .replace(/"\w+"\s+(?=\w)/g, '')
+  .replace(/Read More\s*»/g, '')
+  .replace(/\d{1,2}\/\d{1,2}\/\d{4}\s+No Comments/g, '')
+  .replace(/December \d{1,2}, \d{4}\s+No Comments/g, '')
+  .replace(/May \d{1,2}, \d{4}\s+No Comments/g, '')
+  .replace(/July \d{1,2}, \d{4}\s+No Comments/g, '')
+  .replace(/September \d{1,2}, \d{4}\s+No Comments/g, '')
+  .replace(/\s\s+/g, ' ')
+  .trim()}
 ---
 
 CRITICAL INSTRUCTIONS:
@@ -333,7 +344,7 @@ Return a JSON object with this exact structure:
         }
       ],
       temperature: 0.1,
-      max_tokens: 2000, // Reduced for faster processing
+      max_tokens: 1200, // Further reduced for faster processing
       response_format: { type: "json_object" }
     });
 
@@ -466,22 +477,17 @@ export const generateSchemasWithOpenRouter = async (
   const detectedSchemaTypes = analyzeContentForSchemaTypes(pageText, url);
   console.log('📊 Detected schema types:', detectedSchemaTypes);
 
-  // Option 2: Quality-First Stack
+  // Speed-Optimized Stack: Gemini Flash first (fastest + free)
   const providers = [
     { 
-      name: 'GPT-4o-mini (Primary)', 
+      name: 'Gemini 2.0 Flash (Primary)', 
+      model: 'google/gemini-2.0-flash-exp:free',
+      cost: 'Free'
+    },
+    { 
+      name: 'GPT-4o-mini (Fallback)', 
       model: 'openai/gpt-4o-mini',
       cost: '$0.21/1K'
-    },
-    { 
-      name: 'Gemini 2.0 Flash (Fallback 1)', 
-      model: 'google/gemini-2.0-flash-exp:free',
-      cost: '$0.11/1K'
-    },
-    { 
-      name: 'Mistral Small (Fallback 2)', 
-      model: 'mistralai/mistral-small',
-      cost: '$0.25/1K'
     }
   ];
 

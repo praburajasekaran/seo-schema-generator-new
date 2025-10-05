@@ -26,32 +26,32 @@ export interface SchemaGenerationConfig {
   enableFallback: boolean;
 }
 
-// Default configuration
+// Default configuration - Optimized for speed
 const DEFAULT_CONFIG: SchemaGenerationConfig = {
   providers: {
     openai: {
-      name: 'OpenRouter (GPT-4o-mini → Gemini Flash → Mistral Small)',
+      name: 'OpenRouter (Gemini Flash → GPT-4o-mini)',
       enabled: !!process.env.OPENROUTER_API_KEY,
       priority: 1,
-      timeout: 30000,
-      retries: 2
+      timeout: 15000, // Reduced from 30s to 15s
+      retries: 1 // Reduced from 2 to 1
     },
     gemini: {
       name: 'OpenRouter Fallback',
       enabled: false, // Disabled since OpenRouter handles all AI providers
       priority: 2,
-      timeout: 30000,
-      retries: 2
+      timeout: 15000,
+      retries: 1
     },
     templates: {
       name: 'Template-based Generation',
-      enabled: true,
+      enabled: false, // Disabled for speed - AI is faster than templates
       priority: 3,
-      timeout: 10000,
+      timeout: 5000,
       retries: 1
     }
   },
-  maxSchemas: 3,
+  maxSchemas: 2, // Reduced from 3 to 2 for faster processing
   enableValidation: true,
   enableFallback: true
 };
@@ -77,7 +77,9 @@ export class MultiProviderSchemaService {
 
   // Generate cache key from URL and content hash
   private generateCacheKey(url: string, pageText: string, websiteInfo: WebsiteInfo): string {
-    const contentHash = btoa(JSON.stringify({ url, pageText: pageText.substring(0, 1000), websiteInfo }));
+    // Use encodeURIComponent to safely encode Unicode characters
+    const contentString = JSON.stringify({ url, pageText: pageText.substring(0, 1000), websiteInfo });
+    const contentHash = btoa(encodeURIComponent(contentString));
     return `schema_${contentHash}`;
   }
 

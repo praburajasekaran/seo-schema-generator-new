@@ -11,7 +11,8 @@ import { ErrorIcon } from './components/icons/ErrorIcon';
 import { ClipboardIcon } from './components/icons/ClipboardIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
 import { Info, Database, CheckCircle, Zap, Search, FileText } from 'lucide-react';
-import pallavaImage from './pallava-1.png';
+// Import the image as a static asset
+const pallavaImage = '/pallava-1.png';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -252,9 +253,9 @@ const App: React.FC = () => {
           existingSchemaText
         );
         
-        // Add timeout to schema generation (30 seconds max)
+        // Add timeout to schema generation (20 seconds max for faster feedback)
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Schema generation timeout')), 30000)
+          setTimeout(() => reject(new Error('Schema generation timeout')), 20000)
         );
         
         const result = await Promise.race([schemaPromise, timeoutPromise]) as any;
@@ -369,24 +370,24 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen text-slate-800 font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <main className="container mx-auto px-6 pt-8 pb-16 md:pt-16 md:pb-24">
+      <main className="container mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pt-8 sm:pb-16 md:pt-16 md:pb-24">
         {/* Hero Banner */}
-        <div className="relative mb-12 rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative mb-8 sm:mb-12 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
           <img 
             src={pallavaImage} 
             alt="Ancient temples and monuments in golden light" 
-            className="w-full h-72 md:h-96 object-cover"
+            className="w-full h-64 sm:h-72 md:h-96 object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-          <div className="absolute bottom-8 left-8 right-8 text-center">
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/20 backdrop-blur-sm rounded-full text-base font-medium text-white shadow-lg mb-6">
-              <Info className="w-5 h-5" />
+          <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 text-center">
+            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm sm:text-base font-medium text-white shadow-lg mb-4 sm:mb-6">
+              <Info className="w-4 h-4 sm:w-5 sm:h-5" />
               <span>Free • No signup required</span>
             </div>
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 drop-shadow-lg">
+            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg leading-tight">
               SEO Schema Generator
             </h1>
-            <p className="text-xl md:text-2xl text-white/95 drop-shadow-md max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-xl md:text-2xl text-white/95 drop-shadow-md max-w-3xl mx-auto leading-relaxed px-2">
               Paste a URL. We'll analyze the page and generate relevant JSON-LD schemas for you.
             </p>
           </div>
@@ -394,28 +395,28 @@ const App: React.FC = () => {
 
 
         {/* Features Section */}
-        <div className="max-w-4xl mx-auto mb-12">
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
-              <div className="w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Database className="w-6 h-6 text-blue-600" />
+        <div className="max-w-4xl mx-auto mb-8 sm:mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Smart Content Detection</h3>
-              <p className="text-sm text-slate-600">Automatically detects content types and generates relevant schemas</p>
+              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Smart Content Detection</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">Automatically detects content types and generates relevant schemas</p>
             </div>
-            <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
-              <div className="w-12 h-12 mx-auto mb-4 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-green-600" />
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-green-100 rounded-lg flex items-center justify-center">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Validated Output</h3>
-              <p className="text-sm text-slate-600">All schemas are validated and ready to implement</p>
+              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Validated Output</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">All schemas are validated and ready to implement</p>
             </div>
-            <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
-              <div className="w-12 h-12 mx-auto mb-4 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Zap className="w-6 h-6 text-purple-600" />
+            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm sm:col-span-2 lg:col-span-1">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Advanced Bypass</h3>
-              <p className="text-sm text-slate-600">
+              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Advanced Bypass</h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {browserAutomationAvailable 
                   ? "Browser automation available for Cloudflare bypass" 
                   : "Multiple fallback methods for protected sites"
@@ -425,43 +426,39 @@ const App: React.FC = () => {
           </div>
 
           {/* Example URLs */}
-          <div className="bg-slate-50/80 backdrop-blur-sm rounded-xl p-6 border border-slate-200/50">
-            <h3 className="font-semibold text-slate-900 mb-4 text-center">Try these example URLs:</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <div className="bg-slate-50/80 backdrop-blur-sm rounded-xl p-4 sm:p-6 border border-slate-200/50">
+            <h3 className="font-semibold text-slate-900 mb-3 sm:mb-4 text-center text-sm sm:text-base">Try these example URLs:</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <div className="space-y-2 sm:space-y-3">
                 <button 
                   onClick={() => setUrl('https://shop.yuukke.com/products/millet-jaggery-cookies')}
-                  className="w-full text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-sm"
+                  className="w-full text-left p-3 sm:p-4 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-xs sm:text-sm"
                 >
-                  <span className="font-medium text-slate-900">E-commerce Product</span>
-                  <br />
-                  <span className="text-slate-500">shop.yuukke.com/products/millet-jaggery-cookies</span>
+                  <span className="font-medium text-slate-900 block mb-1">E-commerce Product</span>
+                  <span className="text-slate-500 text-xs sm:text-sm break-all">shop.yuukke.com/products/millet-jaggery-cookies</span>
                 </button>
                 <button 
                   onClick={() => setUrl('https://liveright.in/2024/03/30/tips-to-regulate-healthy-vaginal-discharge/')}
-                  className="w-full text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-sm"
+                  className="w-full text-left p-3 sm:p-4 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-xs sm:text-sm"
                 >
-                  <span className="font-medium text-slate-900">Blog Article</span>
-                  <br />
-                  <span className="text-slate-500">liveright.in/.../tips-to-regulate-healthy-vaginal-discharge/</span>
+                  <span className="font-medium text-slate-900 block mb-1">Blog Article</span>
+                  <span className="text-slate-500 text-xs sm:text-sm break-all">liveright.in/.../tips-to-regulate-healthy-vaginal-discharge/</span>
                 </button>
               </div>
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 <button 
                   onClick={() => setUrl('https://www.radiancerealty.in/premium-2bhk-3bhk-4bhk-apartment-sale-madhavaram-chennai')}
-                  className="w-full text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-sm"
+                  className="w-full text-left p-3 sm:p-4 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-xs sm:text-sm"
                 >
-                  <span className="font-medium text-slate-900">Property Listing</span>
-                  <br />
-                  <span className="text-slate-500">radiancerealty.in/.../apartment-sale-madhavaram-chennai</span>
+                  <span className="font-medium text-slate-900 block mb-1">Property Listing</span>
+                  <span className="text-slate-500 text-xs sm:text-sm break-all">radiancerealty.in/.../apartment-sale-madhavaram-chennai</span>
                 </button>
                 <button 
                   onClick={() => setUrl('https://annapoorna.com.my/indian-cuisine-and-recipes/curry-vegetable-recipe/')}
-                  className="w-full text-left p-3 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-sm"
+                  className="w-full text-left p-3 sm:p-4 bg-white rounded-lg border border-slate-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all duration-200 text-xs sm:text-sm"
                 >
-                  <span className="font-medium text-slate-900">Recipe Page</span>
-                  <br />
-                  <span className="text-slate-500">annapoorna.com.my/.../curry-vegetable-recipe/</span>
+                  <span className="font-medium text-slate-900 block mb-1">Recipe Page</span>
+                  <span className="text-slate-500 text-xs sm:text-sm break-all">annapoorna.com.my/.../curry-vegetable-recipe/</span>
                 </button>
               </div>
             </div>
@@ -470,8 +467,8 @@ const App: React.FC = () => {
         
         <div className="max-w-4xl mx-auto">
           {/* Main Action Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-slate-200/50 shadow-lg p-8 mb-8">
-            <div className="space-y-8">
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/50 shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
+            <div className="space-y-6 sm:space-y-8">
               <SettingsForm
                 profiles={profiles}
                 selectedProfile={selectedProfile}
@@ -480,7 +477,7 @@ const App: React.FC = () => {
                 onProfileDelete={handleProfileDelete}
               />
               
-              <div className="border-t border-slate-200/50 pt-8">
+              <div className="border-t border-slate-200/50 pt-6 sm:pt-8">
                 <URLInputForm
                   url={url}
                   setUrl={setUrl}
@@ -493,13 +490,13 @@ const App: React.FC = () => {
 
           {error && (
             <div className="error-message">
-              <ErrorIcon className="w-6 h-6" />
-              <div className="flex-1">
-                <span>{error}</span>
+              <ErrorIcon className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <span className="text-sm sm:text-base break-words">{error}</span>
                 {error.includes('Cloudflare') && (
                   <button
                     onClick={() => setShowManualInput(true)}
-                    className="ml-4 inline-flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
+                    className="mt-3 sm:mt-0 sm:ml-4 inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-xs sm:text-sm font-medium rounded-lg transition-colors w-full sm:w-auto justify-center"
                   >
                     <FileText className="w-4 h-4" />
                     Manual Content Input
@@ -512,15 +509,15 @@ const App: React.FC = () => {
           {isLoading && <LoadingSpinner loadingStage={loadingStage} />}
 
           {!isLoading && analyzedUrl && (
-            <div className="mt-12 border-t border-slate-200/50 pt-12">
+            <div className="mt-8 sm:mt-12 border-t border-slate-200/50 pt-8 sm:pt-12">
               {hasResults ? (
-                 <div className="space-y-16">
+                 <div className="space-y-12 sm:space-y-16">
                     {essentialSchemas && essentialSchemas.length > 0 && (
                       <div className="fade-in-premium">
-                        <h2 className="text-heading text-center sm:text-left text-slate-900 mb-8">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left text-slate-900 mb-6 sm:mb-8">
                           Essential Site-Wide Schemas
                         </h2>
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                           {essentialSchemas.map((schema, index) => (
                             <SchemaCard key={`essential-${index}`} schema={schema} />
                           ))}
@@ -530,10 +527,10 @@ const App: React.FC = () => {
                     
                     {breadcrumbSchema && (
                        <div className="fade-in-premium">
-                        <h2 className="text-heading text-center sm:text-left text-slate-900 mb-8">
+                        <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left text-slate-900 mb-6 sm:mb-8">
                           Structural Schemas
                         </h2>
-                        <div className="space-y-8">
+                        <div className="space-y-6 sm:space-y-8">
                            <SchemaCard schema={breadcrumbSchema} />
                         </div>
                       </div>
@@ -541,14 +538,14 @@ const App: React.FC = () => {
 
                     {schemas && schemas.length > 0 && (
                       <div>
-                        <div className="mb-8">
+                        <div className="mb-6 sm:mb-8">
                           <div className="text-center sm:text-left">
-                             <h2 className="text-4xl font-bold font-sans text-slate-900 mb-4">
+                             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-sans text-slate-900 mb-3 sm:mb-4">
                               Content-Based Schemas
                             </h2>
                             
                             <p 
-                              className="text-brand-primary font-medium text-xl"
+                              className="text-blue-600 dark:text-blue-400 font-medium text-base sm:text-lg lg:text-xl break-words"
                               title={analyzedUrl}
                             >
                               {analyzedPageTitle || analyzedUrl}
@@ -556,10 +553,10 @@ const App: React.FC = () => {
                           </div>
                         </div>
                         {validSchemas.length > 1 && (
-                          <div className="mb-8 flex justify-center sm:justify-start">
+                          <div className="mb-6 sm:mb-8 flex justify-center sm:justify-start">
                             <button
                               onClick={handleCopyAll}
-                              className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-brand-primary hover:bg-brand-secondary text-white rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+                              className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
                               aria-label="Copy all valid schemas to clipboard"
                             >
                               {isAllCopied ? (
@@ -576,7 +573,7 @@ const App: React.FC = () => {
                             </button>
                           </div>
                         )}
-                        <div className="space-y-6">
+                        <div className="space-y-4 sm:space-y-6">
                           {schemas.map((schema, index) => (
                             <SchemaCard key={index} schema={schema} />
                           ))}
@@ -585,14 +582,14 @@ const App: React.FC = () => {
                     )}
                  </div>
               ) : (
-                <div className="text-center text-slate-500 py-12 fade-in-premium">
-                  <div className="max-w-md mx-auto">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
-                      <Search className="w-8 h-8 text-slate-400" />
+                <div className="text-center text-slate-500 py-8 sm:py-12 fade-in-premium">
+                  <div className="max-w-md mx-auto px-4">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 bg-slate-100 rounded-full flex items-center justify-center">
+                      <Search className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No Schemas Found</h3>
-                    <p className="text-body">We couldn't find any schemas to recommend for that URL.</p>
-                    <p className="text-caption mt-2">This can happen if the page content was inaccessible or did not match any common schema types.</p>
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-700 mb-2">No Schemas Found</h3>
+                    <p className="text-sm sm:text-base text-slate-600 mb-2">We couldn't find any schemas to recommend for that URL.</p>
+                    <p className="text-xs sm:text-sm text-slate-500">This can happen if the page content was inaccessible or did not match any common schema types.</p>
                   </div>
                 </div>
               )}
@@ -600,8 +597,8 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-      <footer className="text-center py-8 text-caption border-t border-slate-200/50">
-        <p>A simple tool by <a href="https://paretoid.com/" target="_blank" rel="noopener noreferrer" className="text-gradient hover:underline transition-all duration-300">Paretoid Marketing LLP</a>. We prefer less software.</p>
+      <footer className="text-center py-6 sm:py-8 text-xs sm:text-sm text-slate-500 border-t border-slate-200/50 px-4">
+        <p>A simple tool by <a href="https://paretoid.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-700 hover:underline transition-all duration-300">Paretoid Marketing LLP</a>. We prefer less software.</p>
       </footer>
 
       {showManualInput && (

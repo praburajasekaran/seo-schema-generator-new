@@ -750,12 +750,202 @@ input[type="checkbox"]:focus {
   .space-y-8 > * + * {
     margin-top: 2rem;
   }
+  
+  /* Mobile card improvements */
+  .card {
+    margin-bottom: 1rem;
+  }
+  
+  /* Mobile modal improvements */
+  .fixed.inset-0 {
+    padding: 0.75rem;
+  }
+  
+  /* Mobile text improvements */
+  .text-xs {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+  
+  /* Mobile button improvements */
+  .btn-primary,
+  .btn-secondary {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  /* Mobile input improvements */
+  .input-field {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+  }
+  
+  /* Mobile container improvements */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Mobile grid improvements */
+  .grid {
+    gap: 0.75rem;
+  }
+  
+  /* Mobile flex improvements */
+  .flex {
+    gap: 0.75rem;
+  }
+  
+  /* Mobile spacing utilities */
+  .p-4 {
+    padding: 0.75rem;
+  }
+  
+  .p-6 {
+    padding: 1rem;
+  }
+  
+  .p-8 {
+    padding: 1.25rem;
+  }
+  
+  .mb-8 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .mb-12 {
+    margin-bottom: 2rem;
+  }
+  
+  .mt-8 {
+    margin-top: 1.5rem;
+  }
+  
+  .mt-12 {
+    margin-top: 2rem;
+  }
 }
 
 /* Focus states for accessibility */
 .focus-ring:focus {
   outline: 2px solid var(--brand-500);
   outline-offset: 2px;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  button, 
+  input, 
+  select, 
+  textarea {
+    min-height: 44px; /* iOS recommended touch target */
+  }
+  
+  /* Better mobile scrolling */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  /* Mobile-friendly modals */
+  .fixed.inset-0 {
+    align-items: flex-start;
+    padding-top: 1rem;
+    overflow-y: auto;
+  }
+  
+  /* Mobile text selection */
+  ::selection {
+    background-color: var(--brand-200);
+    color: var(--brand-900);
+  }
+  
+  /* Mobile form focus improvements */
+  .input-field:focus {
+    transform: none; /* Disable transform on mobile for better UX */
+  }
+  
+  /* Mobile button improvements */
+  .btn-primary:active,
+  .btn-secondary:active {
+    transform: scale(0.98);
+  }
+  
+  /* Mobile card hover improvements */
+  .card:hover {
+    transform: none; /* Disable hover transforms on mobile */
+  }
+  
+  /* Mobile spacing for better readability */
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-12 > * + * {
+    margin-top: 2.5rem;
+  }
+  
+  .space-y-16 > * + * {
+    margin-top: 3rem;
+  }
+  
+  /* Mobile typography improvements */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+  }
+  
+  p {
+    line-height: 1.6;
+  }
+  
+  /* Mobile code blocks */
+  pre {
+    font-size: 0.75rem;
+    line-height: 1.4;
+  }
+  
+  /* Mobile list improvements */
+  ul, ol {
+    padding-left: 1.5rem;
+  }
+  
+  /* Mobile link improvements */
+  a {
+    word-break: break-word;
+  }
+  
+  /* Mobile image improvements */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Mobile table improvements */
+  table {
+    font-size: 0.875rem;
+  }
+  
+  /* Mobile utility classes */
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  .mobile-block {
+    display: block !important;
+  }
+  
+  .mobile-flex {
+    display: flex !important;
+  }
+  
+  .mobile-grid {
+    display: grid !important;
+  }
 }
 
 /* Premium Loading States - Sophisticated animations */

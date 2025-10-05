@@ -61,11 +61,11 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
     await new Promise(resolve => setTimeout(resolve, delay));
   }
 
-  // Optimized proxy services - reduced to fastest/most reliable ones
+  // Updated proxy services - using more reliable alternatives
   const proxyServices = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://corsproxy.io/?${encodeURIComponent(url)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+    `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`
   ];
 
   // Rotate through realistic user agents to avoid detection
@@ -120,8 +120,8 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
           response = await fetch(proxyUrl, {
             method: 'GET',
             headers,
-            // Optimized timeout - reduced to 12 seconds for faster failure
-            signal: AbortSignal.timeout(12000), // Reduced to 12 seconds
+            // Optimized timeout - reduced to 8 seconds for faster failure
+            signal: AbortSignal.timeout(8000), // Reduced to 8 seconds
             // Add referrer to make request look more legitimate
             referrer: 'https://www.google.com/',
             referrerPolicy: 'strict-origin-when-cross-origin'
@@ -209,17 +209,61 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
       });
 
       // 3. Intelligently clean the document for main content extraction (like a "Reader Mode")
-      const selectorsToRemove = ['header', 'footer', 'nav', 'aside', 'form', 'script', 'style', '[role="navigation"]', '[role="search"]', '[role="banner"]', '[role="contentinfo"]'];
+      const selectorsToRemove = [
+        'header', 'footer', 'nav', 'aside', 'form', 'script', 'style', 
+        '[role="navigation"]', '[role="search"]', '[role="banner"]', '[role="contentinfo"]',
+        'noscript', 'iframe', 'embed', 'object', 'video', 'audio',
+        '.advertisement', '.ads', '.ad', '.sidebar', '.widget', '.social-share',
+        '.comments', '.comment', '.related-posts', '.tags', '.categories'
+      ];
       selectorsToRemove.forEach(selector => {
         doc.querySelectorAll(selector).forEach(el => el.remove());
       });
       
-      // 4. Extract the main text content
+      // 4. Remove image alt text and other metadata that can pollute content
+      doc.querySelectorAll('img').forEach(img => {
+        // Remove alt text that's just generic descriptions
+        const alt = img.getAttribute('alt') || '';
+        if (alt && (
+          alt.toLowerCase().includes('image') || 
+          alt.toLowerCase().includes('photo') || 
+          alt.toLowerCase().includes('picture') ||
+          alt.toLowerCase().includes('banner') ||
+          alt.toLowerCase().includes('logo') ||
+          alt.length < 3
+        )) {
+          img.removeAttribute('alt');
+        }
+      });
+      
+      // Remove elements that commonly contain metadata
+      doc.querySelectorAll('[class*="meta"], [class*="metadata"], [class*="info"]').forEach(el => {
+        const text = el.textContent?.toLowerCase() || '';
+        if (text.includes('image') || text.includes('photo') || text.includes('banner')) {
+          el.remove();
+        }
+      });
+      
+      // 5. Extract the main text content
       const mainContentElement = doc.querySelector('main') || doc.querySelector('article') || doc.body;
       let pageText = mainContentElement.textContent || "";
       
-      // Clean up excessive whitespace and newlines
-      pageText = pageText.replace(/\s\s+/g, ' ').trim();
+      // 6. Advanced text cleaning
+      // Remove quoted strings that are likely metadata (like "Image", "Annapoorna", etc.)
+      pageText = pageText
+        .replace(/"Image"\s+/g, '') // Remove "Image" followed by whitespace
+        .replace(/"Annapoorna"\s+/g, '') // Remove "Annapoorna" followed by whitespace
+        .replace(/"\w+"\s+(?=\w)/g, '') // Remove quoted single words followed by text
+        .replace(/\s\s+/g, ' ') // Clean up excessive whitespace
+        .replace(/^\s*"[^"]*"\s*/gm, '') // Remove lines that start with quoted strings
+        .replace(/\n\s*\n/g, '\n') // Remove empty lines
+        .replace(/Read More\s*»/g, '') // Remove "Read More »" links
+        .replace(/\d{1,2}\/\d{1,2}\/\d{4}\s+No Comments/g, '') // Remove date and "No Comments"
+        .replace(/December \d{1,2}, \d{4}\s+No Comments/g, '') // Remove specific date patterns
+        .replace(/May \d{1,2}, \d{4}\s+No Comments/g, '') // Remove specific date patterns
+        .replace(/July \d{1,2}, \d{4}\s+No Comments/g, '') // Remove specific date patterns
+        .replace(/September \d{1,2}, \d{4}\s+No Comments/g, '') // Remove specific date patterns
+        .trim();
       
       console.log(`Successfully fetched content via proxy ${i + 1}`);
       
@@ -526,7 +570,18 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
 
     HERE IS THE PAGE CONTENT:
     ---
-    ${pageText.substring(0, 8000)} 
+    ${pageText.substring(0, 3000)
+      .replace(/"Image"\s+/g, '')
+      .replace(/"Annapoorna"\s+/g, '')
+      .replace(/"\w+"\s+(?=\w)/g, '')
+      .replace(/Read More\s*»/g, '')
+      .replace(/\d{1,2}\/\d{1,2}\/\d{4}\s+No Comments/g, '')
+      .replace(/December \d{1,2}, \d{4}\s+No Comments/g, '')
+      .replace(/May \d{1,2}, \d{4}\s+No Comments/g, '')
+      .replace(/July \d{1,2}, \d{4}\s+No Comments/g, '')
+      .replace(/September \d{1,2}, \d{4}\s+No Comments/g, '')
+      .replace(/\s\s+/g, ' ')
+      .trim()}
     ---
 
     CONTENT ANALYSIS RESULTS:

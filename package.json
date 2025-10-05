@@ -17,6 +17,7 @@
     "express": "^5.1.0",
     "lucide-react": "^0.544.0",
     "openai": "^6.1.0",
+    "playwright": "^1.55.1",
     "puppeteer": "^24.23.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

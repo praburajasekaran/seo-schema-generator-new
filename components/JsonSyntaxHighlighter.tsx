@@ -28,9 +28,9 @@ const JsonSyntaxHighlighter: React.FC<JsonSyntaxHighlighterProps> = ({ jsonStrin
   });
 
   return (
-    <pre className="p-4 md:p-6 text-sm overflow-x-auto">
+    <pre className="p-3 sm:p-4 md:p-6 text-xs sm:text-sm overflow-x-auto">
       <code 
-        className="text-slate-800 dark:text-slate-300 whitespace-pre-wrap font-mono"
+        className="text-slate-800 dark:text-slate-300 whitespace-pre-wrap font-mono leading-relaxed"
         dangerouslySetInnerHTML={{ __html: highlightedJson }} 
       />
     </pre>

@@ -64,26 +64,26 @@ export const SchemaCard: React.FC<SchemaCardProps> = ({ schema }) => {
 
   return (
     <div className={`card premium-hover ${isValid ? '' : 'border-red-300 dark:border-red-700/50'} fade-in-premium`}>
-      <div className="p-4 md:p-6">
-        <div className="flex justify-between items-start gap-4">
-            <div>
-                <h3 className="text-heading text-slate-900 dark:text-text-primary">{schema.schemaType}</h3>
-                <p className="text-body text-slate-600 dark:text-text-secondary mt-2">{schema.description}</p>
+      <div className="p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
+                <h3 className="text-lg sm:text-xl lg:text-2xl font-bold text-slate-900 dark:text-text-primary break-words">{schema.schemaType}</h3>
+                <p className="text-sm sm:text-base text-slate-600 dark:text-text-secondary mt-2 leading-relaxed">{schema.description}</p>
             </div>
             {isValid ? (
-                <div className="flex-shrink-0 flex items-center gap-2 text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-3 py-1.5 rounded-full font-medium shadow-premium">
-                    <CheckIcon className="w-4 h-4" />
+                <div className="flex-shrink-0 flex items-center gap-2 text-xs sm:text-sm text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium shadow-premium self-start">
+                    <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Valid</span>
                 </div>
             ) : (
-                <div className="flex-shrink-0 flex items-center gap-2 text-sm text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900/50 px-3 py-1.5 rounded-full font-medium shadow-premium">
-                    <ErrorIcon className="w-4 h-4" />
+                <div className="flex-shrink-0 flex items-center gap-2 text-xs sm:text-sm text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900/50 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full font-medium shadow-premium self-start">
+                    <ErrorIcon className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span>Invalid</span>
                 </div>
             )}
         </div>
         {!isValid && schema.validationError && (
-             <div className="mt-4 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 p-3 rounded-md text-sm">
+             <div className="mt-3 sm:mt-4 bg-red-50 dark:bg-red-900/30 text-red-800 dark:text-red-200 p-3 rounded-md text-xs sm:text-sm">
                 <p><strong className="font-semibold">Validation Error:</strong> {schema.validationError}</p>
             </div>
         )}
@@ -91,44 +91,44 @@ export const SchemaCard: React.FC<SchemaCardProps> = ({ schema }) => {
       <div className="relative bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
         <JsonSyntaxHighlighter jsonString={schema.jsonLd} />
       </div>
-       <div className="bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-900/80 backdrop-blur-sm p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <p className="text-xs text-slate-500 dark:text-text-secondary flex-grow">
-             Paste this into the <code className="bg-slate-200 dark:bg-slate-900/50 px-1 py-0.5 rounded">&lt;head&gt;</code> of your page's HTML.
+       <div className="bg-gradient-to-r from-slate-50/80 to-white/80 dark:from-slate-800/80 dark:to-slate-900/80 backdrop-blur-sm p-3 sm:p-4 flex flex-col gap-3 sm:gap-4">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-text-secondary text-center sm:text-left">
+             Paste this into the <code className="bg-slate-200 dark:bg-slate-900/50 px-1 py-0.5 rounded text-xs">&lt;head&gt;</code> of your page's HTML.
           </p>
-          <div className="flex items-center justify-end gap-2 w-full sm:w-auto flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center sm:justify-end gap-2 sm:gap-3">
             {isValid && (
               <button
                 onClick={handleTestWithGoogle}
-                className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[2.5rem] sm:min-h-[2.75rem]"
                 aria-label="Open Google Rich Results Test and copy schema to clipboard"
               >
                 {googleTestState === 'copied_and_opened' ? (
                   <>
-                    <CheckIcon className="w-4 h-4 text-green-500 dark:text-green-400" />
-                    <span>Copied! Paste in Google's tool.</span>
+                    <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 dark:text-green-400" />
+                    <span className="text-xs sm:text-sm">Copied! Paste in Google's tool.</span>
                   </>
                 ) : (
                   <>
-                    <ExternalLinkIcon className="w-4 h-4" />
-                    <span>Open Google Test Tool</span>
+                    <ExternalLinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                    <span className="text-xs sm:text-sm">Open Google Test Tool</span>
                   </>
                 )}
               </button>
             )}
             <button
               onClick={handleCopy}
-              className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto text-xs sm:text-sm px-3 sm:px-4 py-2 sm:py-2.5 min-h-[2.5rem] sm:min-h-[2.75rem]"
               aria-label="Copy schema to clipboard"
             >
               {isCopied ? (
                 <>
-                  <CheckIcon className="w-4 h-4 text-green-500 dark:text-green-400" />
-                  <span>Copied!</span>
+                  <CheckIcon className="w-3 h-3 sm:w-4 sm:h-4 text-green-500 dark:text-green-400" />
+                  <span className="text-xs sm:text-sm">Copied!</span>
                 </>
               ) : (
                 <>
-                  <ClipboardIcon className="w-4 h-4" />
-                  <span>Copy Script Tag</span>
+                  <ClipboardIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm">Copy Script Tag</span>
                 </>
               )}
             </button>
