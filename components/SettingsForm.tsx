@@ -17,7 +17,6 @@ const BLANK_FORM_STATE = {
 };
 
 const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, onProfileSelect, onProfileSave, onProfileDelete }) => {
-  console.log('SettingsForm received profiles:', profiles);
   const [formData, setFormData] = useState(selectedProfile ? { ...selectedProfile } : BLANK_FORM_STATE);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
@@ -75,18 +74,61 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
         </p>
 
         <div className="mb-6">
-            <label htmlFor="profile-select" className="block text-sm font-medium text-slate-600 dark:text-text-secondary mb-1">
-                Active Profile
+            <label className="block text-sm font-medium text-slate-600 dark:text-text-secondary mb-3">
+                Active Profile ({profiles.length} profiles)
             </label>
-            <select 
-                id="profile-select" 
-                onChange={handleSelectChange} 
-                value={selectedProfile?.id ?? 'new'}
-                className="input-field w-full"
-            >
-                <option value="new">+ Create New Profile</option>
-                {profiles.map(p => <option key={p.id} value={p.id}>{p.profileName}</option>)}
-            </select>
+            <div className="space-y-2">
+              <label className="flex items-center p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors">
+                <input
+                  type="radio"
+                  name="profile-select"
+                  value="new"
+                  checked={!selectedProfile}
+                  onChange={() => onProfileSelect(null)}
+                  className="mr-3 text-brand-600 focus:ring-brand-500"
+                />
+                <div>
+                  <div className="font-medium text-slate-900 dark:text-slate-100">+ Create New Profile</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400">Start with a fresh profile</div>
+                </div>
+              </label>
+              {profiles.map(p => (
+                <div key={p.id} className="flex items-center p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                  <label className="flex items-center flex-grow cursor-pointer">
+                    <input
+                      type="radio"
+                      name="profile-select"
+                      value={p.id}
+                      checked={selectedProfile?.id === p.id}
+                      onChange={() => onProfileSelect(p.id)}
+                      className="mr-3 text-brand-600 focus:ring-brand-500"
+                    />
+                    <div className="flex-grow">
+                      <div className="font-medium text-slate-900 dark:text-slate-100">{p.profileName}</div>
+                      <div className="text-sm text-slate-500 dark:text-slate-400">
+                        {p.companyName && `${p.companyName} • `}
+                        {p.founderName && `by ${p.founderName}`}
+                      </div>
+                    </div>
+                  </label>
+                  <button
+                    onClick={() => {
+                      if (selectedProfile?.id === p.id) {
+                        setShowDeleteConfirm(true);
+                      } else {
+                        onProfileDelete(p.id);
+                      }
+                    }}
+                    className="ml-3 p-1.5 text-slate-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    aria-label={`Delete profile ${p.profileName}`}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              ))}
+            </div>
         </div>
 
         {isSaved && (
@@ -161,17 +203,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
             />
           </div>
 
-          <div className="flex justify-between items-center pt-4">
-            {selectedProfile && (
-              <button
-                type="button"
-                onClick={() => setShowDeleteConfirm(true)}
-                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
-              >
-                Delete
-              </button>
-            )}
-
+          <div className="flex justify-end items-center pt-4">
             <button
                 type="submit"
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"

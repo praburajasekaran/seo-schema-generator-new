@@ -11,7 +11,7 @@ import { CheckIcon } from './components/icons/CheckIcon';
 import { SunIcon } from './components/icons/SunIcon';
 import { MoonIcon } from './components/icons/MoonIcon';
 
-type Theme = 'light' | 'dark';
+type Theme = 'light' | 'dark' | 'grayscale';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -27,11 +27,8 @@ const App: React.FC = () => {
   const [profiles, setProfiles] = useState<WebsiteProfile[]>(() => {
     try {
       const savedProfiles = localStorage.getItem('websiteProfiles');
-      console.log('Loading profiles from localStorage:', savedProfiles);
       if (savedProfiles) {
-        const parsed = JSON.parse(savedProfiles);
-        console.log('Parsed profiles:', parsed);
-        return parsed;
+        return JSON.parse(savedProfiles);
       }
       // Migration for old single websiteInfo
       const oldInfo = localStorage.getItem('websiteInfo');
@@ -82,7 +79,6 @@ const App: React.FC = () => {
   
   // Effect to persist profiles and selected ID to localStorage
   useEffect(() => {
-    console.log('Saving profiles to localStorage:', profiles);
     localStorage.setItem('websiteProfiles', JSON.stringify(profiles));
   }, [profiles]);
 
@@ -135,15 +131,24 @@ const App: React.FC = () => {
   useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      document.documentElement.classList.remove('grayscale');
       localStorage.setItem('theme', 'dark');
-    } else {
+    } else if (theme === 'grayscale') {
       document.documentElement.classList.remove('dark');
+      document.documentElement.classList.add('grayscale');
+      localStorage.setItem('theme', 'grayscale');
+    } else {
+      document.documentElement.classList.remove('dark', 'grayscale');
       localStorage.setItem('theme', 'light');
     }
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+    setTheme(prevTheme => {
+      if (prevTheme === 'light') return 'dark';
+      if (prevTheme === 'dark') return 'grayscale';
+      return 'light';
+    });
   };
 
   const generateEssentialSchemas = (profile: WebsiteProfile, url: string): RecommendedSchema[] => {
@@ -308,36 +313,44 @@ const App: React.FC = () => {
           className="p-3 rounded-full text-slate-500 dark:text-text-secondary hover:bg-white/80 dark:hover:bg-slate-700/80 backdrop-blur-sm transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-brand-accent shadow-premium"
           aria-label="Toggle theme"
         >
-          {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : <SunIcon className="w-6 h-6" />}
+          {theme === 'light' ? <MoonIcon className="w-6 h-6" /> : theme === 'dark' ? <SunIcon className="w-6 h-6" /> : <span className="w-6 h-6 text-xs font-bold">B&W</span>}
         </button>
       </header>
       <main className="container mx-auto px-4 py-8 md:py-16">
-        <div className="text-center mb-16 fade-in-premium">
-            <h1 className="text-hero mb-6">
+        <div className="text-center mb-20 fade-in-premium">
+            <h1 className="text-hero mb-8">
               SEO Schema Generator
             </h1>
-          <p className="text-body text-slate-600 dark:text-text-secondary max-w-2xl mx-auto">
+          <p className="text-body text-slate-600 dark:text-text-secondary max-w-2xl mx-auto mb-8">
             Paste a URL. We'll analyze the page and generate relevant JSON-LD schemas for you.
           </p>
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-brand-50 dark:bg-brand-900/30 rounded-full text-sm font-medium text-brand-700 dark:text-brand-300">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Free • No signup required</span>
+          </div>
         </div>
         
-        <div className="max-w-3xl mx-auto">
-          <SettingsForm
-            profiles={profiles}
-            selectedProfile={selectedProfile}
-            onProfileSelect={setSelectedProfileId}
-            onProfileSave={handleProfileSave}
-            onProfileDelete={handleProfileDelete}
-          />
-          <URLInputForm
-            url={url}
-            setUrl={setUrl}
-            onAnalyze={handleAnalyze}
-            isLoading={isLoading}
-          />
+        <div className="max-w-3xl mx-auto space-y-12">
+          <div className="space-y-8">
+            <SettingsForm
+              profiles={profiles}
+              selectedProfile={selectedProfile}
+              onProfileSelect={setSelectedProfileId}
+              onProfileSave={handleProfileSave}
+              onProfileDelete={handleProfileDelete}
+            />
+            <URLInputForm
+              url={url}
+              setUrl={setUrl}
+              onAnalyze={handleAnalyze}
+              isLoading={isLoading}
+            />
+          </div>
 
           {error && (
-            <div className="mt-8 bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-200 px-4 py-3 rounded-lg flex items-center gap-3">
+            <div className="error-message">
               <ErrorIcon className="w-6 h-6" />
               <span>{error}</span>
             </div>
@@ -375,13 +388,13 @@ const App: React.FC = () => {
 
                     {schemas && schemas.length > 0 && (
                       <div>
-                        <div className="mb-6">
+                        <div className="mb-8">
                           <div className="text-center sm:text-left">
-                             <h2 className="text-2xl font-semibold font-sans text-slate-900 dark:text-text-primary">
-                              Content-Based Schemas for
+                             <h2 className="text-3xl font-bold font-sans text-slate-900 dark:text-text-primary mb-2">
+                              Content-Based Schemas
                             </h2>
                             <p 
-                              className="text-brand-primary dark:text-brand-accent font-normal text-xl mt-1"
+                              className="text-brand-primary dark:text-brand-accent font-medium text-lg"
                               title={analyzedUrl}
                             >
                               {analyzedPageTitle || analyzedUrl}
