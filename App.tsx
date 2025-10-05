@@ -369,58 +369,61 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen text-slate-800 font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      <main className="container mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pt-8 sm:pb-16 md:pt-16 md:pb-24">
-        {/* Hero Banner */}
-        <div className="relative mb-8 sm:mb-12 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600">
+      <main className="container mx-auto px-6 sm:px-8 pt-8 pb-16 sm:pt-12 sm:pb-20 md:pt-20 md:pb-32">
+        {/* Hero Banner - Enhanced with Erik Kennedy Heuristics */}
+        <div className="relative mb-16 sm:mb-20 rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600">
           <img 
             src={pallavaImage} 
             alt="Ancient temples and monuments in golden light" 
-            className="w-full h-64 sm:h-72 md:h-96 object-cover"
+            className="w-full h-72 sm:h-80 md:h-[28rem] object-cover"
             onError={(e) => {
               console.error('Image failed to load:', pallavaImage);
               e.currentTarget.style.display = 'none';
             }}
             onLoad={() => console.log('Image loaded successfully:', pallavaImage)}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
-          <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 text-center">
-            <div className="inline-flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-2 sm:py-3 bg-white/20 backdrop-blur-sm rounded-full text-sm sm:text-base font-medium text-white shadow-lg mb-4 sm:mb-6">
-              <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+          {/* Enhanced gradient overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+          <div className="absolute bottom-8 sm:bottom-12 left-8 sm:left-12 right-8 sm:right-12 text-center">
+            {/* Badge with better spacing */}
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/25 backdrop-blur-md rounded-full text-base font-semibold text-white shadow-xl mb-8">
+              <Info className="w-5 h-5" />
               <span>Free • No signup required</span>
             </div>
-            <h1 className="text-3xl sm:text-5xl md:text-7xl font-bold text-white mb-3 sm:mb-4 drop-shadow-lg leading-tight">
+            {/* Enhanced typography hierarchy */}
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white mb-6 drop-shadow-2xl leading-tight tracking-tight">
               SEO Schema Generator
             </h1>
-            <p className="text-base sm:text-xl md:text-2xl text-white/95 drop-shadow-md max-w-3xl mx-auto leading-relaxed px-2">
+            <p className="text-lg sm:text-2xl md:text-3xl text-white/95 drop-shadow-lg max-w-4xl mx-auto leading-relaxed font-light">
               Paste a URL. We'll analyze the page and generate relevant JSON-LD schemas for you.
             </p>
           </div>
         </div>
 
 
-        {/* Features Section */}
-        <div className="max-w-4xl mx-auto mb-8 sm:mb-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Database className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+        {/* Features Section - Enhanced with 8pt grid and better spacing */}
+        <div className="max-w-5xl mx-auto mb-16 sm:mb-20">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            <div className="text-center p-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 bg-blue-100 rounded-2xl flex items-center justify-center shadow-md">
+                <Database className="w-8 h-8 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Smart Content Detection</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">Automatically detects content types and generates relevant schemas</p>
+              <h3 className="font-bold text-slate-900 mb-4 text-lg">Smart Content Detection</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">Automatically detects content types and generates relevant schemas</p>
             </div>
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+            <div className="text-center p-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300">
+              <div className="w-16 h-16 mx-auto mb-6 bg-green-100 rounded-2xl flex items-center justify-center shadow-md">
+                <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Validated Output</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">All schemas are validated and ready to implement</p>
+              <h3 className="font-bold text-slate-900 mb-4 text-lg">Validated Output</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">All schemas are validated and ready to implement</p>
             </div>
-            <div className="text-center p-4 sm:p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-slate-200/50 shadow-sm sm:col-span-2 lg:col-span-1">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-purple-100 rounded-lg flex items-center justify-center">
-                <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" />
+            <div className="text-center p-8 bg-white/70 backdrop-blur-sm rounded-2xl border border-slate-200/60 shadow-lg hover:shadow-xl transition-all duration-300 sm:col-span-2 lg:col-span-1">
+              <div className="w-16 h-16 mx-auto mb-6 bg-purple-100 rounded-2xl flex items-center justify-center shadow-md">
+                <Zap className="w-8 h-8 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2 text-sm sm:text-base">Advanced Bypass</h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <h3 className="font-bold text-slate-900 mb-4 text-lg">Advanced Bypass</h3>
+              <p className="text-sm text-slate-600 leading-relaxed">
                 {browserAutomationAvailable 
                   ? "Browser automation available for Cloudflare bypass" 
                   : "Multiple fallback methods for protected sites"
@@ -469,10 +472,10 @@ const App: React.FC = () => {
           </div>
         </div>
         
-        <div className="max-w-4xl mx-auto">
-          {/* Main Action Section */}
-          <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-slate-200/50 shadow-lg p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8">
-            <div className="space-y-6 sm:space-y-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Main Action Section - Enhanced with better prominence */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-slate-200/60 shadow-xl p-8 mb-12">
+            <div className="space-y-8">
               <SettingsForm
                 profiles={profiles}
                 selectedProfile={selectedProfile}
@@ -481,7 +484,7 @@ const App: React.FC = () => {
                 onProfileDelete={handleProfileDelete}
               />
               
-              <div className="border-t border-slate-200/50 pt-6 sm:pt-8">
+              <div className="border-t-2 border-slate-200/60 pt-8">
                 <URLInputForm
                   url={url}
                   setUrl={setUrl}
@@ -513,15 +516,15 @@ const App: React.FC = () => {
           {isLoading && <LoadingSpinner loadingStage={loadingStage} />}
 
           {!isLoading && analyzedUrl && (
-            <div className="mt-8 sm:mt-12 border-t border-slate-200/50 pt-8 sm:pt-12">
+            <div className="mt-16 border-t-2 border-slate-200/60 pt-16">
               {hasResults ? (
-                 <div className="space-y-12 sm:space-y-16">
+                 <div className="space-y-20">
                     {essentialSchemas && essentialSchemas.length > 0 && (
                       <div className="fade-in-premium">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left text-slate-900 mb-6 sm:mb-8">
+                        <h2 className="text-3xl sm:text-4xl font-black text-center sm:text-left text-slate-900 mb-8">
                           Essential Site-Wide Schemas
                         </h2>
-                        <div className="space-y-6 sm:space-y-8">
+                        <div className="space-y-8">
                           {essentialSchemas.map((schema, index) => (
                             <SchemaCard key={`essential-${index}`} schema={schema} />
                           ))}
@@ -531,7 +534,7 @@ const App: React.FC = () => {
                     
                     {breadcrumbSchema && (
                        <div className="fade-in-premium">
-                        <h2 className="text-2xl sm:text-3xl font-bold text-center sm:text-left text-slate-900 mb-6 sm:mb-8">
+                        <h2 className="text-3xl sm:text-4xl font-black text-center sm:text-left text-slate-900 mb-8">
                           Structural Schemas
                         </h2>
                         <div className="space-y-6 sm:space-y-8">
@@ -542,14 +545,14 @@ const App: React.FC = () => {
 
                     {schemas && schemas.length > 0 && (
                       <div>
-                        <div className="mb-6 sm:mb-8">
+                        <div className="mb-8">
                           <div className="text-center sm:text-left">
-                             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold font-sans text-slate-900 mb-3 sm:mb-4">
+                             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">
                               Content-Based Schemas
                             </h2>
                             
                             <p 
-                              className="text-blue-600 dark:text-blue-400 font-medium text-base sm:text-lg lg:text-xl break-words"
+                              className="text-blue-600 font-semibold text-lg break-words"
                               title={analyzedUrl}
                             >
                               {analyzedPageTitle || analyzedUrl}
@@ -557,10 +560,10 @@ const App: React.FC = () => {
                           </div>
                         </div>
                         {validSchemas.length > 1 && (
-                          <div className="mb-6 sm:mb-8 flex justify-center sm:justify-start">
+                          <div className="mb-8 flex justify-center sm:justify-start">
                             <button
                               onClick={handleCopyAll}
-                              className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-auto"
+                              className="flex items-center justify-center gap-3 px-6 py-3 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300 w-full sm:w-auto"
                               aria-label="Copy all valid schemas to clipboard"
                             >
                               {isAllCopied ? (
