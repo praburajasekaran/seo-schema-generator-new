@@ -100,17 +100,17 @@ export const SchemaCard: React.FC<SchemaCardProps> = ({ schema }) => {
               <button
                 onClick={handleTestWithGoogle}
                 className="btn-secondary flex items-center justify-center gap-2 w-full sm:w-auto"
-                aria-label="Test schema with Google's Rich Results Test"
+                aria-label="Open Google Rich Results Test and copy schema to clipboard"
               >
                 {googleTestState === 'copied_and_opened' ? (
                   <>
                     <CheckIcon className="w-4 h-4 text-green-500 dark:text-green-400" />
-                    <span>Copied! Paste to test.</span>
+                    <span>Copied! Paste in Google's tool.</span>
                   </>
                 ) : (
                   <>
                     <ExternalLinkIcon className="w-4 h-4" />
-                    <span>Test with Google</span>
+                    <span>Open Google Test Tool</span>
                   </>
                 )}
               </button>

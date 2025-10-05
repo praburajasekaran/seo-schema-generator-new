@@ -103,11 +103,23 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
     <div className="mb-8">
       {/* Profile Selection - Outside Accordion */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-slate-600 mb-4 text-center">
-          Active Profile ({profiles.length} profiles)
-        </label>
+        {profiles.length === 0 ? (
+          <div className="text-center py-4">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-50 rounded-lg border border-slate-200 mb-3">
+              <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+              <span className="text-sm font-medium text-slate-700">No profiles yet</span>
+            </div>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              Create a profile to save your site details and speed up schema generation.
+            </p>
+          </div>
+        ) : (
+          <label className="block text-sm font-medium text-slate-600 mb-4 text-center">
+            Active Profile ({profiles.length} profiles)
+          </label>
+        )}
         
-        <div className="flex items-center justify-center gap-3 flex-wrap">
+        <div className="flex items-center justify-center gap-4 flex-wrap">
           {/* Existing Profile Logos */}
           {profiles.map(p => (
             <div key={p.id} className="relative group">
@@ -189,12 +201,17 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
           {/* Create New Profile Card */}
           <button
             onClick={handleCreateNew}
-            className="group p-1 rounded-lg hover:ring-2 hover:ring-brand-300 transition-all duration-200"
-            title="Create New Profile"
+            className="group relative p-1 rounded-lg hover:ring-2 hover:ring-blue-300 transition-all duration-200"
+            title="Create Website Profile"
           >
-            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-brand-500 to-brand-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform duration-200">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl group-hover:scale-105 transition-transform duration-200 shadow-sm group-hover:shadow-md">
               +
             </div>
+            {profiles.length === 0 && (
+              <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                <span className="text-xs text-slate-500 font-medium">Create Profile</span>
+              </div>
+            )}
           </button>
         </div>
       </div>
@@ -207,7 +224,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
           <div className="p-6">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-slate-900">
-                {isEditing ? 'Edit Profile' : 'Create New Profile'}
+                {isEditing ? 'Edit Website Profile' : 'Create Website Profile'}
               </h2>
               <button
                 onClick={handleModalClose}
@@ -306,7 +323,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
                   type="submit"
                   className="btn-primary"
                 >
-                  {isEditing ? 'Save Changes' : 'Create Profile'}
+                  {isEditing ? 'Save Changes' : 'Create Website Profile'}
                 </button>
               </div>
             </form>

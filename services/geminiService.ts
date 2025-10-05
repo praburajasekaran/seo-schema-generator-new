@@ -1,5 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { RecommendedSchema, GeminiApiResponse, WebsiteInfo, BreadcrumbItem } from "../types";
+import { 
+  isRateLimited, 
+  recordSuccessfulRequest, 
+  recordRateLimit, 
+  getRequestDelay, 
+  isRateLimitResponse, 
+  getRetryAfter 
+} from "./rateLimiting";
 
 const API_KEY = process.env.API_KEY;
 
@@ -44,33 +52,107 @@ const schema = {
  * @returns An object containing the cleaned page text, any existing schema text, and an array of breadcrumb items.
  */
 export const scrapePageContent = async (url: string): Promise<{ pageText: string; existingSchemaText: string; breadcrumbs: BreadcrumbItem[]; pageTitle: string; }> => {
-  // Multiple CORS proxy services as fallbacks
+  console.log(`Starting content scraping for: ${url}`);
+  
+  // Check if we're rate limited for this URL
+  if (isRateLimited(url)) {
+    const delay = getRequestDelay(url);
+    console.log(`Rate limited for ${url}. Waiting ${Math.round(delay/1000)}s before attempting...`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+  }
+
+  // Optimized proxy services - reduced to fastest/most reliable ones
   const proxyServices = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-    `https://cors-anywhere.herokuapp.com/${url}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-    `https://thingproxy.freeboard.io/fetch/${url}`
+    `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
+
+  // Rotate through realistic user agents to avoid detection
+  const userAgents = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/121.0',
+    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
   ];
 
   let lastError: Error | null = null;
   
   for (let i = 0; i < proxyServices.length; i++) {
     const proxyUrl = proxyServices[i];
+    const userAgent = userAgents[i % userAgents.length];
     
     try {
       console.log(`Attempting to fetch via proxy ${i + 1}/${proxyServices.length}: ${proxyUrl.split('?')[0]}`);
       
-      const response = await fetch(proxyUrl, {
-        method: 'GET',
-        headers: {
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-          'User-Agent': 'Mozilla/5.0 (compatible; SEO-Schema-Generator/1.0)',
-        },
-        // Add timeout
-        signal: AbortSignal.timeout(15000) // 15 second timeout
-      });
+      // Add adaptive delay between requests to avoid rate limiting
+      if (i > 0) {
+        const delay = getRequestDelay(url);
+        console.log(`Waiting ${Math.round(delay/1000)}s before next attempt...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      
+      // Enhanced headers to mimic real browser behavior
+      const headers: Record<string, string> = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'User-Agent': userAgent,
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'DNT': '1',
+        'Connection': 'keep-alive'
+      };
+
+      // Optimized retry logic - reduced to 2 attempts per proxy for faster failure
+      let requestAttempts = 0;
+      const maxRequestAttempts = 2;
+      let response: Response | null = null;
+      
+      while (requestAttempts < maxRequestAttempts) {
+        try {
+          response = await fetch(proxyUrl, {
+            method: 'GET',
+            headers,
+            // Optimized timeout - reduced to 12 seconds for faster failure
+            signal: AbortSignal.timeout(12000), // Reduced to 12 seconds
+            // Add referrer to make request look more legitimate
+            referrer: 'https://www.google.com/',
+            referrerPolicy: 'strict-origin-when-cross-origin'
+          });
+          break; // Success, exit retry loop
+        } catch (requestError) {
+          requestAttempts++;
+          console.warn(`Request attempt ${requestAttempts}/${maxRequestAttempts} failed:`, requestError);
+          
+          if (requestAttempts < maxRequestAttempts) {
+            // Wait before retrying (exponential backoff)
+            const retryDelay = Math.min(1000 * Math.pow(2, requestAttempts - 1), 5000);
+            console.log(`Retrying in ${retryDelay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, retryDelay));
+          } else {
+            throw requestError; // Re-throw if all attempts failed
+          }
+        }
+      }
+      
+      if (!response) {
+        throw new Error('All request attempts failed');
+      }
       
       if (!response.ok) {
+        // Check for rate limiting
+        if (isRateLimitResponse(response)) {
+          const retryAfter = getRetryAfter(response);
+          recordRateLimit(url, retryAfter || undefined);
+          throw new Error(`Rate limited by proxy service. Status: ${response.status} ${response.statusText}`);
+        }
         throw new Error(`Proxy service returned status: ${response.status} ${response.statusText}`);
       }
       
@@ -140,6 +222,10 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
       pageText = pageText.replace(/\s\s+/g, ' ').trim();
       
       console.log(`Successfully fetched content via proxy ${i + 1}`);
+      
+      // Record successful request for rate limiting tracking
+      recordSuccessfulRequest(url);
+      
       return { pageText, existingSchemaText, breadcrumbs, pageTitle };
       
     } catch (error) {
@@ -151,17 +237,75 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
         break;
       }
       
-      // Wait a bit before trying the next proxy
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Wait a bit before trying the next proxy (exponential backoff)
+      const delay = Math.min(1000 * Math.pow(2, i), 5000); // Max 5 seconds
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
   
-  // If we get here, all proxies failed
+  // If we get here, all proxies failed - try browser automation as fallback
   console.error("All CORS proxy services failed:", lastError);
+  console.log("Attempting browser automation fallback...");
+  
+  try {
+    // Retry logic for browser automation API (up to 2 attempts)
+    let browserAttempts = 0;
+    const maxBrowserAttempts = 2;
+    
+    while (browserAttempts < maxBrowserAttempts) {
+      try {
+        console.log(`Browser automation attempt ${browserAttempts + 1}/${maxBrowserAttempts}`);
+        
+        const response = await fetch('http://localhost:3001/api/scrape', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url }),
+          signal: AbortSignal.timeout(30000) // 30 second timeout for browser automation
+        });
+
+        if (response.ok) {
+          const browserResult = await response.json();
+          
+          if (browserResult.success && browserResult.pageText) {
+            console.log("Browser automation succeeded!");
+            return {
+              pageText: browserResult.pageText,
+              existingSchemaText: browserResult.existingSchemaText,
+              breadcrumbs: browserResult.breadcrumbs,
+              pageTitle: browserResult.pageTitle
+            };
+          } else {
+            console.warn("Browser automation failed:", browserResult.error);
+            break; // Don't retry if the API responded but failed
+          }
+        } else {
+          console.warn(`Browser automation API returned status: ${response.status}`);
+          if (browserAttempts < maxBrowserAttempts - 1) {
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          }
+        }
+      } catch (browserError) {
+        browserAttempts++;
+        console.warn(`Browser automation attempt ${browserAttempts} failed:`, browserError);
+        
+        if (browserAttempts < maxBrowserAttempts) {
+          // Wait before retrying (exponential backoff)
+          const retryDelay = Math.min(2000 * Math.pow(2, browserAttempts - 1), 8000);
+          console.log(`Retrying browser automation in ${retryDelay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+    }
+  } catch (browserError) {
+    console.warn("Browser automation not available or failed:", browserError);
+  }
   
   // Provide more specific error messages based on the type of failure
   if (lastError?.message.includes('timeout') || lastError?.message.includes('AbortError')) {
-    throw new Error("Request timed out. The website might be slow to respond or blocking automated requests. Please try again or with a different URL.");
+    throw new Error("Request timed out. The website might be slow to respond or blocking automated requests. Please try the manual content input option or try again later.");
   }
   
   if (lastError?.message.includes('404') || lastError?.message.includes('Not Found')) {
@@ -169,21 +313,26 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
   }
   
   if (lastError?.message.includes('403') || lastError?.message.includes('Forbidden')) {
-    throw new Error("Access to this URL is forbidden. The website might be blocking automated requests or require authentication.");
+    throw new Error("This website is protected by Cloudflare or similar security measures. Please use the 'Manual Content Input' option below.");
   }
   
   if (lastError?.message.includes('CORS') || lastError?.message.includes('cross-origin')) {
-    throw new Error("CORS policy prevents access to this URL. All proxy services are currently unavailable. Please try again later or contact support if the issue persists.");
+    throw new Error("CORS policy prevents access to this URL. All proxy services and browser automation failed. Please use the manual content input option.");
   }
   
-  throw new Error("Failed to fetch content from the URL. The page might be down, blocking requests, or all CORS proxy services could be temporarily unavailable. Please try again later.");
+  throw new Error("Failed to fetch content from the URL. The page might be down, blocking requests, or all services could be temporarily unavailable. Please use the manual content input option.");
 };
+
 
 
 // Content analysis patterns for predictable schema detection
 const CONTENT_PATTERNS = {
+  testimonial: {
+    keywords: ['testimonial', 'testimonials', 'client says', 'customer says', 'what our clients say', 'check what our clients say', 'client feedback', 'customer feedback', 'client review', 'customer review'],
+    schemaTypes: ['Review', 'Testimonial']
+  },
   article: {
-    keywords: ['article', 'blog', 'post', 'news', 'story', 'opinion', 'review', 'tutorial', 'guide'],
+    keywords: ['article', 'blog', 'post', 'news', 'story', 'opinion', 'tutorial', 'guide'],
     schemaTypes: ['BlogPosting', 'NewsArticle', 'Article']
   },
   product: {
@@ -191,7 +340,7 @@ const CONTENT_PATTERNS = {
     schemaTypes: ['Product', 'Offer']
   },
   recipe: {
-    keywords: ['recipe', 'ingredients', 'cook', 'bake', 'prep time', 'servings', 'cooking time'],
+    keywords: ['recipe', 'ingredients', 'cook', 'bake', 'prep time', 'servings', 'cooking time', 'method', 'instructions', 'directions', 'steps', 'preparation', 'how to', 'tablespoon', 'teaspoon', 'cup', 'chopped', 'minced', 'sliced', 'diced', 'organic', 'basmati rice', 'curry', 'vegetable', 'cooking', 'simmer', 'boil', 'heat', 'add', 'stir', 'season', 'serve'],
     schemaTypes: ['Recipe']
   },
   faq: {
@@ -211,29 +360,47 @@ const CONTENT_PATTERNS = {
     schemaTypes: ['Event']
   },
   review: {
-    keywords: ['review', 'rating', 'stars', 'opinion', 'feedback', 'testimonial'],
+    keywords: ['review', 'rating', 'stars', 'opinion', 'feedback'],
     schemaTypes: ['Review', 'AggregateRating']
   }
 };
 
 // Function to analyze content and determine likely schema types
-const analyzeContentForSchemaTypes = (pageText: string, url: string): string[] => {
+export const analyzeContentForSchemaTypes = (pageText: string, url: string): string[] => {
   const text = pageText.toLowerCase();
   const urlLower = url.toLowerCase();
   const detectedTypes: string[] = [];
   
-  // Check each pattern
-  Object.entries(CONTENT_PATTERNS).forEach(([category, pattern]) => {
+  // Define priority order for pattern matching (testimonials should be checked first)
+  const priorityOrder = ['testimonial', 'review', 'product', 'recipe', 'faq', 'howto', 'event', 'localBusiness', 'article'];
+  
+  // Check patterns in priority order
+  for (const category of priorityOrder) {
+    const pattern = CONTENT_PATTERNS[category as keyof typeof CONTENT_PATTERNS];
+    if (!pattern) continue;
+    
     const hasKeywords = pattern.keywords.some(keyword => 
       text.includes(keyword) || urlLower.includes(keyword)
     );
     
     if (hasKeywords) {
       detectedTypes.push(...pattern.schemaTypes);
+      
+      // For testimonials, be more specific - if we detect testimonial keywords, 
+      // don't also add article types unless there are strong article indicators
+      if (category === 'testimonial') {
+        const hasArticleKeywords = CONTENT_PATTERNS.article.keywords.some(keyword => 
+          text.includes(keyword) && !['review', 'opinion'].includes(keyword)
+        );
+        if (!hasArticleKeywords) {
+          // Remove article types if we found testimonials without strong article indicators
+          return [...new Set(detectedTypes)];
+        }
+      }
     }
-  });
+  }
   
-  // Always include Article/BlogPosting for content pages
+  // Always include Article/BlogPosting for content pages if no specific type detected
   if (detectedTypes.length === 0 && text.length > 200) {
     detectedTypes.push('BlogPosting');
   }
@@ -296,6 +463,23 @@ const createFallbackSchema = (schemaType: string, pageText: string, websiteInfo:
     case 'LocalBusiness':
       baseSchema.name = title;
       baseSchema.description = description;
+      break;
+    
+    case 'Review':
+    case 'Testimonial':
+      baseSchema.reviewBody = description;
+      baseSchema.itemReviewed = {
+        "@type": "Organization",
+        "name": websiteInfo.companyName || title
+      };
+      // Try to extract author name from content
+      const authorMatch = pageText.match(/(?:by|from|author:?)\s+([A-Za-z\s]+)/i);
+      if (authorMatch) {
+        baseSchema.author = {
+          "@type": "Person",
+          "name": authorMatch[1].trim()
+        };
+      }
       break;
   }
 
@@ -371,6 +555,21 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
     - LocalBusiness: Must include @context, @type, name, description, address (if available)
     - Event: Must include @context, @type, name, description, startDate, location (if available)
     - Review: Must include @context, @type, itemReviewed, reviewRating, author
+    - Testimonial: Must include @context, @type, reviewBody, author (with name), datePublished (if available)
+    - Recipe: Must include @context, @type, name, description, recipeIngredient array, recipeInstructions array. 
+      CRITICAL: For Recipe schemas, also include image (ImageObject), nutrition (NutritionInformation), 
+      video (VideoObject if available), keywords (comma-separated string), aggregateRating (AggregateRating), 
+      prepTime, cookTime, totalTime (ISO 8601 duration format), recipeYield, recipeCategory, recipeCuisine, 
+      author, datePublished. Extract ingredients as array of strings, instructions as array of HowToStep objects.
+      RECIPE EXTRACTION RULES:
+      - Look for ingredient lists (often marked with bullet points, numbers, or "Ingredients:" header)
+      - Extract cooking instructions (often numbered steps or "Method:" section)
+      - Parse cooking times (prep time, cook time, total time) and convert to ISO 8601 format (PT15M, PT30M, etc.)
+      - Extract serving size/yield information
+      - Identify cuisine type from content (Indian, Italian, etc.)
+      - Extract recipe category (Main Course, Appetizer, Dessert, etc.)
+      - Look for cooking methods (bake, fry, simmer, etc.)
+      - Extract any nutrition information if available
 
     Generate schemas now following these exact instructions.
   `;

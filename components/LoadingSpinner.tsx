@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 
-const LoadingSpinner: React.FC = () => {
+interface LoadingSpinnerProps {
+  loadingStage?: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ loadingStage }) => {
   const [currentBenefit, setCurrentBenefit] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   const benefits = [
     {
@@ -32,12 +37,14 @@ const LoadingSpinner: React.FC = () => {
   ];
 
   useEffect(() => {
+    if (isPaused) return;
+
     const interval = setInterval(() => {
       setCurrentBenefit((prev) => (prev + 1) % benefits.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [benefits.length]);
+  }, [benefits.length, isPaused]);
 
   return (
     <div className="flex flex-col items-center justify-center my-16 max-w-2xl mx-auto">
@@ -51,15 +58,24 @@ const LoadingSpinner: React.FC = () => {
 
       {/* Loading text */}
       <p className="text-slate-600 dark:text-text-secondary text-lg font-medium mb-8">
-        Analyzing content and generating schemas...
+        {loadingStage || "Analyzing content and generating schemas..."}
       </p>
 
       {/* Benefits showcase */}
-      <div className="w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-200/50 dark:border-slate-700/50">
+      <div 
+        className="relative w-full bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 border border-slate-200/50 dark:border-slate-700/50 cursor-pointer transition-all duration-200 hover:bg-white/70 dark:hover:bg-slate-800/70"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
         <div className="text-center h-48 flex flex-col justify-center">
           <div className="text-4xl mb-3 animate-bounce">
             {benefits[currentBenefit].icon}
           </div>
+          {isPaused && (
+            <div className="absolute top-2 right-2 text-xs text-slate-500 dark:text-slate-400 bg-white/80 dark:bg-slate-700/80 px-2 py-1 rounded-full">
+             
+            </div>
+          )}
           <h3 className="text-xl font-semibold text-slate-900 dark:text-text-primary mb-2">
             {benefits[currentBenefit].title}
           </h3>
@@ -85,7 +101,10 @@ const LoadingSpinner: React.FC = () => {
 
       {/* Subtle encouragement */}
       <p className="text-sm text-slate-500 dark:text-slate-400 mt-6 text-center">
-        This usually takes 10-15 seconds. We're working hard to find the best schemas for your content!
+        {loadingStage?.includes('Fetching') 
+          ? "This may take 10-20 seconds for complex sites. We're using optimized scraping with multiple fallback methods!"
+          : "This usually takes 5-10 seconds. We're working hard to find the best schemas for your content!"
+        }
       </p>
     </div>
   );
