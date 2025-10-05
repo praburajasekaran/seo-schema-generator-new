@@ -8,6 +8,7 @@ import LoadingSpinner from './components/LoadingSpinner';
 import { ErrorIcon } from './components/icons/ErrorIcon';
 import { ClipboardIcon } from './components/icons/ClipboardIcon';
 import { CheckIcon } from './components/icons/CheckIcon';
+import pallavaImage from './pallava.png';
 
 const App: React.FC = () => {
   const [url, setUrl] = useState<string>('');
@@ -280,7 +281,7 @@ const App: React.FC = () => {
         {/* Hero Banner */}
         <div className="relative mb-24 rounded-2xl overflow-hidden shadow-2xl">
           <img 
-            src="/pallava.png" 
+            src={pallavaImage} 
             alt="Ancient temples and monuments in golden light" 
             className="w-full h-72 md:h-96 object-cover"
           />
