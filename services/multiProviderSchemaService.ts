@@ -26,21 +26,21 @@ export interface SchemaGenerationConfig {
   enableFallback: boolean;
 }
 
-// Default configuration - Optimized for speed
+// Default configuration - Gemini Flash Only (Maximum Speed)
 const DEFAULT_CONFIG: SchemaGenerationConfig = {
   providers: {
     openai: {
-      name: 'OpenRouter (Gemini Flash → GPT-4o-mini)',
+      name: 'Gemini Flash Only (Fastest)',
       enabled: !!process.env.OPENROUTER_API_KEY,
       priority: 1,
-      timeout: 15000, // Reduced from 30s to 15s
-      retries: 1 // Reduced from 2 to 1
+      timeout: 10000, // Reduced to 10s for maximum speed
+      retries: 1
     },
     gemini: {
-      name: 'OpenRouter Fallback',
-      enabled: false, // Disabled since OpenRouter handles all AI providers
+      name: 'Legacy Gemini Service',
+      enabled: !!process.env.GEMINI_API_KEY && !process.env.OPENROUTER_API_KEY,
       priority: 2,
-      timeout: 15000,
+      timeout: 10000,
       retries: 1
     },
     templates: {
@@ -51,8 +51,8 @@ const DEFAULT_CONFIG: SchemaGenerationConfig = {
       retries: 1
     }
   },
-  maxSchemas: 2, // Reduced from 3 to 2 for faster processing
-  enableValidation: true,
+  maxSchemas: 2, // Keep at 2 for faster processing
+  enableValidation: false, // Disabled for maximum speed
   enableFallback: true
 };
 

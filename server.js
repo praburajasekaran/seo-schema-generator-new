@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { chromium } from 'playwright';
+import puppeteer from 'puppeteer';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -20,7 +20,7 @@ app.post('/api/scrape', async (req, res) => {
   let browser = null;
   
   try {
-    // Launch browser
+    // Launch browser with improved configuration
     browser = await puppeteer.launch({
       headless: 'new',
       args: [
@@ -33,9 +33,16 @@ app.post('/api/scrape', async (req, res) => {
         '--disable-gpu',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images', // Disable images for faster loading
+        '--disable-javascript', // Disable JS for faster loading (we only need HTML)
         '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
       ],
-      timeout: 30000
+      timeout: 20000 // Reduced timeout
     });
 
     const page = await browser.newPage();
@@ -58,12 +65,29 @@ app.post('/api/scrape', async (req, res) => {
       'DNT': '1'
     });
 
-    // Navigate to the page
+    // Navigate to the page with better timeout handling
     console.log(`Navigating to: ${url}`);
-    await page.goto(url, { 
-      waitUntil: 'domcontentloaded', 
-      timeout: 20000 
-    });
+    try {
+      await page.goto(url, { 
+        waitUntil: 'domcontentloaded', 
+        timeout: 15000 // Reduced timeout
+      });
+    } catch (navError) {
+      console.warn(`Navigation failed, trying with networkidle: ${navError.message}`);
+      try {
+        await page.goto(url, { 
+          waitUntil: 'networkidle0', 
+          timeout: 10000 
+        });
+      } catch (secondNavError) {
+        console.warn(`Second navigation attempt failed: ${secondNavError.message}`);
+        // Try one more time with minimal wait
+        await page.goto(url, { 
+          waitUntil: 'load', 
+          timeout: 8000 
+        });
+      }
+    }
 
     // Wait for potential Cloudflare challenge
     try {

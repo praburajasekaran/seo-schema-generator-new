@@ -65,6 +65,8 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
   const proxyServices = [
     `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
     `https://corsproxy.io/?${encodeURIComponent(url)}`,
+    `https://cors-anywhere.herokuapp.com/${url}`,
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
     `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(url)}`
   ];
 
@@ -306,7 +308,7 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ url }),
-          signal: AbortSignal.timeout(30000) // 30 second timeout for browser automation
+          signal: AbortSignal.timeout(25000) // Reduced to 25 seconds
         });
 
         if (response.ok) {
@@ -347,24 +349,111 @@ export const scrapePageContent = async (url: string): Promise<{ pageText: string
     console.warn("Browser automation not available or failed:", browserError);
   }
   
+  // Final fallback: Try direct fetch with minimal headers (some sites allow this)
+  console.log("Attempting direct fetch as final fallback...");
+  try {
+    const directResponse = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; SEO-Schema-Generator/1.0)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1'
+      },
+      signal: AbortSignal.timeout(10000) // 10 second timeout for direct fetch
+    });
+    
+    if (directResponse.ok) {
+      const html = await directResponse.text();
+      if (html && html.trim().length > 0) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        
+        const pageTitle = doc.querySelector('title')?.textContent?.trim() || url;
+        const existingSchemaScripts = Array.from(doc.querySelectorAll('script[type="application/ld+json"]'));
+        const existingSchemaText = existingSchemaScripts
+          .map(script => {
+            try {
+              const parsed = JSON.parse(script.textContent || '{}');
+              return JSON.stringify(parsed, null, 2);
+            } catch {
+              return script.textContent || '';
+            }
+          })
+          .join('\n---\n');
+        
+        // Extract breadcrumbs
+        const breadcrumbs: BreadcrumbItem[] = [];
+        const breadcrumbSelectors = [
+          'nav[aria-label="breadcrumb"] ol li a',
+          '.breadcrumb a',
+          '.breadcrumbs a',
+          '.crumbs a'
+        ];
+        let breadcrumbElements: Element[] = [];
+        for(const selector of breadcrumbSelectors) {
+          const elements = Array.from(doc.querySelectorAll(selector));
+          if (elements.length > 0) {
+            breadcrumbElements = elements;
+            break;
+          }
+        }
+        
+        breadcrumbElements.forEach(el => {
+          const anchor = el as HTMLAnchorElement;
+          const name = anchor.textContent?.trim();
+          const url = anchor.href;
+          if (name && url) {
+            breadcrumbs.push({ name, url });
+          }
+        });
+        
+        // Clean and extract main content
+        const selectorsToRemove = ['header', 'footer', 'nav', 'aside', 'form', 'script', 'style', '[role="navigation"]', '[role="search"]', '[role="banner"]', '[role="contentinfo"]'];
+        selectorsToRemove.forEach(selector => {
+          doc.querySelectorAll(selector).forEach(el => el.remove());
+        });
+        
+        const mainContentElement = doc.querySelector('main') || doc.querySelector('article') || doc.body;
+        let pageText = mainContentElement.textContent || "";
+        pageText = pageText.replace(/\s\s+/g, ' ').trim();
+        
+        console.log("Direct fetch succeeded!");
+        return { pageText, existingSchemaText, breadcrumbs, pageTitle };
+      }
+    }
+  } catch (directError) {
+    console.warn("Direct fetch fallback failed:", directError);
+  }
+  
   // Provide more specific error messages based on the type of failure
   if (lastError?.message.includes('timeout') || lastError?.message.includes('AbortError')) {
-    throw new Error("Request timed out. The website might be slow to respond or blocking automated requests. Please try the manual content input option or try again later.");
+    throw new Error("⏱️ Request timed out. The website might be slow to respond or blocking automated requests.\n\n💡 Solutions:\n• Try the 'Manual Content Input' option below\n• Wait a few minutes and try again\n• Check if the website is accessible in your browser");
   }
   
   if (lastError?.message.includes('404') || lastError?.message.includes('Not Found')) {
-    throw new Error("The URL could not be found. Please check that the URL is correct and the page exists.");
+    throw new Error("🔍 The URL could not be found (404 error).\n\n💡 Solutions:\n• Check that the URL is correct and the page exists\n• Try accessing the URL in your browser first\n• Use the 'Manual Content Input' option if the page exists");
   }
   
   if (lastError?.message.includes('403') || lastError?.message.includes('Forbidden')) {
-    throw new Error("This website is protected by Cloudflare or similar security measures. Please use the 'Manual Content Input' option below.");
+    throw new Error("🛡️ This website is protected by security measures (403 Forbidden).\n\n💡 Solutions:\n• Use the 'Manual Content Input' option below\n• The site may be blocking automated requests\n• Try again later when the protection might be relaxed");
   }
   
   if (lastError?.message.includes('CORS') || lastError?.message.includes('cross-origin')) {
-    throw new Error("CORS policy prevents access to this URL. All proxy services and browser automation failed. Please use the manual content input option.");
+    throw new Error("🚫 CORS policy prevents access to this URL.\n\n💡 Solutions:\n• Use the 'Manual Content Input' option below\n• All proxy services and browser automation failed\n• This is a browser security restriction");
   }
   
-  throw new Error("Failed to fetch content from the URL. The page might be down, blocking requests, or all services could be temporarily unavailable. Please use the manual content input option.");
+  if (lastError?.message.includes('ERR_NAME_NOT_RESOLVED') || lastError?.message.includes('DNS')) {
+    throw new Error("🌐 DNS resolution failed - the domain name could not be found.\n\n💡 Solutions:\n• Check that the URL is spelled correctly\n• Verify the website is online\n• Use the 'Manual Content Input' option");
+  }
+  
+  if (lastError?.message.includes('500') || lastError?.message.includes('Internal Server Error')) {
+    throw new Error("⚠️ Server error (500) - the website's server is having issues.\n\n💡 Solutions:\n• Try again in a few minutes\n• Use the 'Manual Content Input' option\n• The website may be temporarily down");
+  }
+  
+  throw new Error("❌ Failed to fetch content from the URL.\n\n💡 Possible causes:\n• The page might be down or blocking requests\n• All scraping services are temporarily unavailable\n• Network connectivity issues\n\n✅ Solution: Use the 'Manual Content Input' option below to paste your content directly.");
 };
 
 
@@ -570,7 +659,7 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
 
     HERE IS THE PAGE CONTENT:
     ---
-    ${pageText.substring(0, 3000)
+    ${pageText.substring(0, 2000)
       .replace(/"Image"\s+/g, '')
       .replace(/"Annapoorna"\s+/g, '')
       .replace(/"\w+"\s+(?=\w)/g, '')

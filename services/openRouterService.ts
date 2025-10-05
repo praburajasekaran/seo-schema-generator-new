@@ -344,7 +344,7 @@ Return a JSON object with this exact structure:
         }
       ],
       temperature: 0.1,
-      max_tokens: 1200, // Further reduced for faster processing
+      max_tokens: 800, // Reduced to 800 for maximum speed
       response_format: { type: "json_object" }
     });
 
@@ -477,17 +477,12 @@ export const generateSchemasWithOpenRouter = async (
   const detectedSchemaTypes = analyzeContentForSchemaTypes(pageText, url);
   console.log('📊 Detected schema types:', detectedSchemaTypes);
 
-  // Speed-Optimized Stack: Gemini Flash first (fastest + free)
+  // Gemini Flash Only - Maximum Speed Configuration
   const providers = [
     { 
-      name: 'Gemini 2.0 Flash (Primary)', 
+      name: 'Gemini 2.0 Flash (Only)', 
       model: 'google/gemini-2.0-flash-exp:free',
       cost: 'Free'
-    },
-    { 
-      name: 'GPT-4o-mini (Fallback)', 
-      model: 'openai/gpt-4o-mini',
-      cost: '$0.21/1K'
     }
   ];
 

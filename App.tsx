@@ -253,9 +253,9 @@ const App: React.FC = () => {
           existingSchemaText
         );
         
-        // Add timeout to schema generation (20 seconds max for faster feedback)
+        // Add timeout to schema generation (15 seconds max for maximum speed)
         const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Schema generation timeout')), 20000)
+          setTimeout(() => reject(new Error('Schema generation timeout')), 15000)
         );
         
         const result = await Promise.race([schemaPromise, timeoutPromise]) as any;
@@ -372,11 +372,16 @@ const App: React.FC = () => {
     <div className="min-h-screen text-slate-800 font-sans bg-gradient-to-br from-slate-50 via-white to-blue-50">
       <main className="container mx-auto px-4 sm:px-6 pt-6 pb-12 sm:pt-8 sm:pb-16 md:pt-16 md:pb-24">
         {/* Hero Banner */}
-        <div className="relative mb-8 sm:mb-12 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl">
+        <div className="relative mb-8 sm:mb-12 rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600">
           <img 
             src={pallavaImage} 
             alt="Ancient temples and monuments in golden light" 
             className="w-full h-64 sm:h-72 md:h-96 object-cover"
+            onError={(e) => {
+              console.error('Image failed to load:', pallavaImage);
+              e.currentTarget.style.display = 'none';
+            }}
+            onLoad={() => console.log('Image loaded successfully:', pallavaImage)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
           <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 text-center">
