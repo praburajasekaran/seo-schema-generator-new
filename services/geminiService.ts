@@ -414,7 +414,7 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
           return { 
             ...s, 
             jsonLd: formattedJsonLd, 
-            validationStatus: 'invalid', 
+            validationStatus: 'invalid' as const, 
             validationError: 'Schema must be a single JSON object.' 
           };
         }
@@ -422,7 +422,7 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
           return { 
             ...s, 
             jsonLd: formattedJsonLd, 
-            validationStatus: 'invalid', 
+            validationStatus: 'invalid' as const, 
             validationError: 'Missing or invalid "@context" property. It should contain "schema.org".' 
           };
         }
@@ -434,12 +434,12 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
           return { 
             ...s, 
             jsonLd: formattedJsonLd, 
-            validationStatus: 'invalid', 
+            validationStatus: 'invalid' as const, 
             validationError: `Mismatched "@type" property. Expected "${s.schemaType}", but found "${type || 'nothing'}".`
           };
         }
 
-        return { ...s, jsonLd: formattedJsonLd, validationStatus: 'valid' };
+        return { ...s, jsonLd: formattedJsonLd, validationStatus: 'valid' as const };
 
       } catch (e) {
         console.error("Failed to parse nested jsonLd string for schema:", s.schemaType, e);
@@ -455,7 +455,7 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
         return { 
           ...s, 
           jsonLd: errorJson, 
-          validationStatus: 'invalid', 
+          validationStatus: 'invalid' as const, 
           validationError: `Invalid JSON format: ${errorMessage}` 
         };
       }
@@ -466,7 +466,7 @@ export const analyzeUrlForSchemas = async (url: string, websiteInfo: WebsiteInfo
     if (validSchemas.length === 0 && detectedSchemaTypes.length > 0) {
       // Create a basic fallback schema
       const fallbackSchema = createFallbackSchema(detectedSchemaTypes[0], pageText, websiteInfo);
-      processedSchemas.push(fallbackSchema);
+      processedSchemas.push(fallbackSchema as any);
     }
 
     return processedSchemas;
