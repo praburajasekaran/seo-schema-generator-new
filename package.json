@@ -1,7 +1,7 @@
 {
   "name": "seo-schema-generator",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A powerful tool that analyzes web pages and generates relevant JSON-LD schemas for better SEO",
   "type": "module",
   "scripts": {
