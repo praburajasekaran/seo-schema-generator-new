@@ -17,6 +17,7 @@ const BLANK_FORM_STATE = {
 };
 
 const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, onProfileSelect, onProfileSave, onProfileDelete }) => {
+  console.log('SettingsForm received profiles:', profiles);
   const [formData, setFormData] = useState(selectedProfile ? { ...selectedProfile } : BLANK_FORM_STATE);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isSaved, setIsSaved] = useState(false);

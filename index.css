@@ -1,26 +1,33 @@
 /* SEO Schema Generator - Premium Design System */
 /* Following Dan Mall's 80/20 Craft Investment Principle */
 
-/* Premium Shadow System - Sophisticated depth */
+/* Heuristic #1: Light Comes from the Sky - Proper drop shadows under raised surfaces */
 .shadow-premium {
   box-shadow: 
-    0 1px 3px 0 rgba(0, 0, 0, 0.1),
-    0 1px 2px 0 rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 2px 8px 0 rgba(0, 0, 0, 0.12),
+    0 1px 3px 0 rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .shadow-premium-lg {
   box-shadow: 
-    0 10px 25px -3px rgba(0, 0, 0, 0.1),
-    0 4px 6px -2px rgba(0, 0, 0, 0.05),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 8px 32px 0 rgba(0, 0, 0, 0.15),
+    0 4px 16px 0 rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .shadow-premium-xl {
   box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+    0 16px 48px 0 rgba(0, 0, 0, 0.18),
+    0 8px 24px 0 rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Heuristic #1: Highlights on top of raised surfaces */
+.shadow-premium-top {
+  box-shadow: 
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.2),
+    0 2px 8px 0 rgba(0, 0, 0, 0.12);
 }
 
 /* Premium Glass Effect */
@@ -35,22 +42,22 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Heuristic #3: Double Your Whitespace - Enhanced spacing */
+/* Heuristic #3: Double Your Whitespace - Enhanced spacing with doubled values */
 .space-doubled {
-  margin: 2rem;
-  padding: 2rem;
+  margin: 4rem;  /* Doubled from 2rem */
+  padding: 4rem; /* Doubled from 2rem */
 }
 
-/* Heuristic #4: 8-pt Grid All the Way - Consistent spacing system */
+/* Heuristic #4: 8-pt Grid All the Way - Consistent spacing system with doubled whitespace */
 :root {
-  --space-1: 0.25rem;  /* 4px */
-  --space-2: 0.5rem;   /* 8px */
-  --space-3: 0.75rem;  /* 12px */
-  --space-4: 1rem;     /* 16px */
-  --space-6: 1.5rem;   /* 24px */
-  --space-8: 2rem;     /* 32px */
-  --space-12: 3rem;    /* 48px */
-  --space-16: 4rem;    /* 64px */
+  --space-1: 0.5rem;   /* 8px - doubled from 4px */
+  --space-2: 1rem;     /* 16px - doubled from 8px */
+  --space-3: 1.5rem;   /* 24px - doubled from 12px */
+  --space-4: 2rem;     /* 32px - doubled from 16px */
+  --space-6: 3rem;     /* 48px - doubled from 24px */
+  --space-8: 4rem;     /* 64px - doubled from 32px */
+  --space-12: 6rem;    /* 96px - doubled from 48px */
+  --space-16: 8rem;    /* 128px - doubled from 64px */
 }
 
 /* Heuristic #5: One Accent → Many Variations - Ocean Blue Spectrum */

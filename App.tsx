@@ -27,8 +27,11 @@ const App: React.FC = () => {
   const [profiles, setProfiles] = useState<WebsiteProfile[]>(() => {
     try {
       const savedProfiles = localStorage.getItem('websiteProfiles');
+      console.log('Loading profiles from localStorage:', savedProfiles);
       if (savedProfiles) {
-        return JSON.parse(savedProfiles);
+        const parsed = JSON.parse(savedProfiles);
+        console.log('Parsed profiles:', parsed);
+        return parsed;
       }
       // Migration for old single websiteInfo
       const oldInfo = localStorage.getItem('websiteInfo');
@@ -79,6 +82,7 @@ const App: React.FC = () => {
   
   // Effect to persist profiles and selected ID to localStorage
   useEffect(() => {
+    console.log('Saving profiles to localStorage:', profiles);
     localStorage.setItem('websiteProfiles', JSON.stringify(profiles));
   }, [profiles]);
 
