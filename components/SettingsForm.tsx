@@ -46,16 +46,14 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted with data:', formData);
     if (!formData.profileName) {
       // Basic validation
       alert('Profile Name is required.');
       return;
     }
-    console.log('Calling onProfileSave with:', formData);
     onProfileSave(formData);
     setIsSaved(true);
-    setTimeout(() => setIsSaved(false), 2000);
+    setTimeout(() => setIsSaved(false), 3000); // Show "Saved!" for 3 seconds
   };
 
   const handleDelete = () => {
@@ -89,6 +87,17 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
                 {profiles.map(p => <option key={p.id} value={p.id}>{p.profileName}</option>)}
             </select>
         </div>
+
+        {isSaved && (
+          <div className="mb-4 p-3 bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700 rounded-lg">
+            <p className="text-sm text-green-800 dark:text-green-200 flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              Profile saved successfully! Changes are now active.
+            </p>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
            <div>
@@ -172,7 +181,7 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    <span>Saved!</span>
+                    <span>✓ Saved Successfully!</span>
                   </>
                 ) : (
                   <>
