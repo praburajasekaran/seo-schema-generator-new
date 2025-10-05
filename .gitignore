@@ -106,8 +106,9 @@ $RECYCLE.BIN/
 # Local development
 *.local
 
-# Large image files
+# Large image files (except small ones needed for the app)
 *.png
+!pallava-1.png
 *.jpg
 *.jpeg
 *.gif
