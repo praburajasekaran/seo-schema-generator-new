@@ -63,7 +63,6 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
     setShowDeleteConfirm(false);
   };
 
-
   return (
     <details className="mb-8 card premium-hover">
       <summary className="p-6 cursor-pointer font-semibold text-slate-700 dark:text-text-secondary select-none list-inside hover:text-brand-600 dark:hover:text-brand-400 transition-colors duration-300">
@@ -145,20 +144,22 @@ const SettingsForm: React.FC<SettingsFormProps> = ({ profiles, selectedProfile, 
               name="companyLogoUrl"
               value={formData.companyLogoUrl}
               onChange={handleChange}
-              placeholder="https://your-company.com/logo.png"
+              placeholder="e.g., https://example.com/logo.png"
               className="input-field w-full"
             />
           </div>
-          <div className="flex items-center justify-end gap-3 pt-2">
-            {selectedProfile && !showDeleteConfirm && (
-                <button
-                    type="button"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-md transition-colors"
-                    >
-                    Delete
-                </button>
+
+          <div className="flex justify-between items-center pt-4">
+            {selectedProfile && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(true)}
+                className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+              >
+                Delete
+              </button>
             )}
+
             <button
                 type="submit"
                 className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
